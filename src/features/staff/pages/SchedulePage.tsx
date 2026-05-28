@@ -320,7 +320,7 @@ export function SchedulePage() {
             </div>
           </div>
           <div className="scp-hdr-right">
-            {/* Single view toggle — only one */}
+            {/* Single view toggle â€” only one */}
             <div className="scp-view-tabs">
               <button
                 className={`scp-view-tab${view === "calendar" ? " scp-view-tab--on" : ""}`}
@@ -343,14 +343,14 @@ export function SchedulePage() {
         {view === "calendar" && (
           <div className="cal-card">
             <div className="cal-nav">
-              <button className="cal-nav-btn" onClick={() => setCalDate(new Date(year, month - 1, 1))}>‹</button>
+              <button className="cal-nav-btn" onClick={() => setCalDate(new Date(year, month - 1, 1))}>â€¹</button>
               <div className="cal-nav-mid">
                 <button className="cal-break-btn" onClick={() => setShowBreakForm(true)}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> Set a break
                 </button>
                 <span className="cal-month">{MONTHS[month]} {year}</span>
               </div>
-              <button className="cal-nav-btn" onClick={() => setCalDate(new Date(year, month + 1, 1))}>›</button>
+              <button className="cal-nav-btn" onClick={() => setCalDate(new Date(year, month + 1, 1))}>â€º</button>
             </div>
 
             <div className="cal-grid">
@@ -377,7 +377,7 @@ export function SchedulePage() {
                             <div key={v._id} className="cal-event"
                               style={{ background: STATUS_COLORS[v.status] ?? "#6b7280" }}
                               onClick={() => setSelectedVisit(v)}
-                              title={`${v.visitorName} — ${STATUS_LABELS[v.status]}`}>
+                              title={`${v.visitorName} â€” ${STATUS_LABELS[v.status]}`}>
                               {v.visitorName.split(" ")[0]}
                             </div>
                           ))}
@@ -428,8 +428,8 @@ export function SchedulePage() {
                         <div className="scp-vc-name">{v.visitorName}</div>
                         <div className="scp-vc-meta">
                           {new Date(v.scheduledDate).toLocaleDateString([], { weekday:"short", month:"short", day:"numeric" })}
-                          {" · "}{new Date(v.scheduledDate).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
-                          {v.purpose && ` · ${v.purpose}`}
+                          {" Â· "}{new Date(v.scheduledDate).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
+                          {v.purpose && ` Â· ${v.purpose}`}
                         </div>
                       </div>
                       <div className="scp-vc-right">
@@ -550,7 +550,7 @@ export function SchedulePage() {
             <div className="scp-modal-hd">
               <div>
                 <div className="scp-modal-title">Schedule a visit</div>
-                <div className="scp-modal-sub">Visitor details — receptionist will see this immediately</div>
+                <div className="scp-modal-sub">Visitor details â€” receptionist will see this immediately</div>
               </div>
               <button className="scp-modal-close" onClick={() => setShowForm(false)}><X size={18} /></button>
             </div>
@@ -642,3 +642,4 @@ export function SchedulePage() {
     </>
   );
 }
+
