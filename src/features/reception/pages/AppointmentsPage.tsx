@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import * as React from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -50,7 +50,7 @@ function printBadge(visit: any) {
   const purpose = visit.purpose ?? "\u2014";
   const w = window.open("","_blank","width=500,height=340");
   if (!w) return;
-  w.document.write(`<!DOCTYPE html><html><head><title>Visitor Badge</title>
+  w.document.write(`<!DOCTYPE html><html><head><title>Visitor<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</title>
 <style>
 @page{size:85.6mm 54mm;margin:0}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -152,7 +152,7 @@ function LiveCalendar({ visits, blockedSlots, onSelectVisit }: {
                 <div className="calendar-events">
                   {dayBlocked.slice(0,1).map((b:any)=>(
                     <div key={b._id} className="calendar-event calendar-event--blocked" title={b.reason??"Blocked"}>
-                      {b.staffName?.split(" ")[0]??"Blocked"}
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>{b.staffName?.split(" ")[0]??"Blocked"}
                     </div>
                   ))}
                   {dayBlocked.length>1&&<div className="calendar-more">+{dayBlocked.length-1} blocked</div>}
@@ -424,7 +424,7 @@ export function AppointmentsPage() {
               onClick={()=>isAppt?handleAction("complete",v):handleWalkInCheckOut(v._id)}>
               {acting?"...":"\u2192 Check Out"}
             </button>
-            <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8 Badge</button>
+            <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button>
           </div>
         )}
       </div>
@@ -785,7 +785,7 @@ export function AppointmentsPage() {
                                         onClick={()=>handleAction(a.action,v)}>{a.label}</button>
                                     ))}
                                     {["checked_in","in_meeting","completed"].includes(v.status)&&(
-                                      <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8 Badge</button>
+                                      <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button>
                                     )}
                                     {["pending","approved","accepted"].includes(v.status)&&(
                                       <button className="action-btn action-btn--reschedule"
@@ -839,7 +839,7 @@ export function AppointmentsPage() {
                                       {checkingOut===v._id?"...":"Check out"}
                                     </button>
                                   )}
-                                  <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8 Badge</button>
+                                  <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button>
                                 </div>
                               </td>
                             </tr>
@@ -876,7 +876,7 @@ export function AppointmentsPage() {
                       <button className="action-btn action-btn--badge"
                         style={{width:"100%",marginTop:8,justifyContent:"center"}}
                         onClick={()=>printBadge(selectedVisit)}>
-                        \U0001f5a8 Print visitor badge
+                        \U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print visitor badge
                       </button>
                     )}
                     {["pending","approved","accepted"].includes(selectedVisit.status)&&(
@@ -937,3 +937,4 @@ export function AppointmentsPage() {
     </div>
   );
 }
+

@@ -19,6 +19,10 @@ export function AdminLayout() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const orgSettings = useQuery(api.orgSettings.get);
+  const myOrg = useQuery(api.orgSettings.getMyOrg);
+  const orgName = myOrg?.name || orgSettings?.branding?.appName || "Porta";
   const [dark, setDark] = useState(() => { const s = localStorage.getItem("porta-theme"); return s ? s === "dark" : true; });
   useEffect(() => { localStorage.setItem("porta-theme", dark ? "dark" : "light"); document.documentElement.setAttribute("data-theme", dark ? "dark" : "light"); }, [dark]);
   const toggle = () => setDark(d => !d);
@@ -36,10 +40,12 @@ export function AdminLayout() {
         .adl-brand-mark{width:36px;height:36px;border-radius:9px;background:${t.accent};color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
         .adl-brand-name{font-size:15px;font-weight:700;color:${t.text};line-height:1.2}
         .adl-brand-sub{font-size:11px;color:${t.textMuted};font-weight:500}
+        .adl-brand-pill{font-size:.65rem;font-weight:700;color:${t.accent};background:${t.accentBg};padding:2px 8px;border-radius:20px;margin-left:4px;letter-spacing:.04em;text-transform:uppercase}
         .adl-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
         .adl-nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:500;color:${t.textMuted};transition:background .12s,color .12s}
         .adl-nav-item:hover{background:${t.navHov};color:${t.text}}
         .adl-nav-item--on{background:${t.accentBg};color:${t.accent}!important;font-weight:600}
+        .adl-nav-lbl{font-size:.85rem;font-weight:500}
         .adl-footer{padding:12px 12px 14px;border-top:1px solid ${t.border};display:flex;flex-direction:column;gap:10px}
         .adl-user{display:flex;align-items:center;gap:9px}
         .adl-av{width:32px;height:32px;border-radius:50%;background:${t.surfaceHov};color:${t.textMuted};font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
@@ -48,13 +54,19 @@ export function AdminLayout() {
         .adl-signout{width:100%;padding:8px;background:transparent;border:1px solid ${t.border};border-radius:8px;font-size:.8rem;font-weight:600;color:${t.textMuted};cursor:pointer;font-family:inherit}
         .adl-signout:hover{background:rgba(239,68,68,.08);color:#ef4444;border-color:rgba(239,68,68,.3)}
         .adl-main{flex:1;overflow-y:auto;min-width:0;background:${t.bg}}
+        .adl-footer-bar{padding:20px 24px;font-size:11px;color:${t.accent};text-align:center;background:transparent;letter-spacing:0.04em;font-weight:500;width:100%;display:block;}
         .adl-topbar{display:flex;justify-content:flex-end;padding:14px 32px 0;background:${t.bg}}
         .adl-toggle{display:flex;align-items:center;gap:7px;background:${t.surface};border:1px solid ${t.border};border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.78rem;font-weight:600;color:${t.textMuted};font-family:inherit}
         .adl-toggle:hover{color:${t.text};background:${t.surfaceHov}}
-        @media(max-width:700px){.adl-sidebar{width:56px;min-width:56px}.adl-brand-name,.adl-brand-sub,.adl-nav-lbl,.adl-uname,.adl-urole,.adl-signout{display:none}.adl-brand{justify-content:center;padding:14px 0}.adl-nav-item{justify-content:center;padding:10px 0}.adl-footer{align-items:center;padding:10px 4px 12px}.adl-topbar{padding:10px 12px 0}}
+        @media(max-width:768px){.adl-wrap{display:block}.adl-sidebar{display:none}.adl-hamburger{display:flex!important}.adl-topbar{padding:10px 16px 0;justify-content:space-between;align-items:center}.adl-main{width:100%;max-width:100%;display:block}.ad-page{padding:16px 12px;max-width:100%;box-sizing:border-box}.ad-stat-grid{grid-template-columns:repeat(2,1fr)}.ad-modal{max-width:100%;margin:0 12px}}
+        .adl-drawer{position:fixed;inset:0;z-index:200;display:flex}
+        .adl-drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55)}
+        .adl-drawer-panel{position:relative;width:260px;background:${t.sidebar};border-right:1px solid ${t.border};display:flex;flex-direction:column;height:100vh;overflow-y:auto;animation:slideIn .2s ease}
+        @keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+        .adl-hamburger{display:none;align-items:center;justify-content:center;background:none;border:1px solid ${t.border};border-radius:8px;padding:7px;cursor:pointer;color:${t.textMuted}}
 
-        /* â”€â”€ Shared admin page styles â”€â”€ */
-        .ad-page{padding:32px;max-width:1100px}
+        /* ── Shared admin page styles ── */
+        .ad-page{padding:32px;max-width:1100px;width:100%;box-sizing:border-box}
         .ad-page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap}
         .ad-title{font-size:1.4rem;font-weight:700;color:${t.text};margin-bottom:4px}
         .ad-sub{font-size:0.85rem;color:${t.textMuted}}
@@ -98,16 +110,35 @@ export function AdminLayout() {
         .ad-stat-sub{font-size:0.75rem;color:${t.textMuted};margin-top:6px}
       `}</style>
       <div className="adl-wrap">
+        {menuOpen && (
+          <div className="adl-drawer">
+            <div className="adl-drawer-overlay" onClick={() => setMenuOpen(false)} />
+            <div className="adl-drawer-panel">
+              <div className="adl-brand"><img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}} /><span className="adl-brand-pill">Admin</span></div>
+          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>{orgName}</div>
+              <nav className="adl-nav">{NAV.map(({ to, label, Icon }) => (<NavLink key={to} to={to} onClick={() => setMenuOpen(false)} className={({ isActive }) => "adl-nav-item" + (isActive ? " adl-nav-item--on" : "")}><Icon size={17} strokeWidth={2} /><span className="adl-nav-lbl">{label}</span></NavLink>))}</nav>
+              <div className="adl-footer"><div className="adl-user"><div className="adl-av">{user?.firstName?.[0]?.toUpperCase() ?? "A"}</div><div><div className="adl-uname">{user?.firstName} {user?.lastName}</div><div className="adl-urole">Admin</div></div></div><button className="adl-signout" onClick={() => { signOut(); navigate("/"); }}>Sign out</button></div>
+            </div>
+          </div>
+        )}
         <aside className="adl-sidebar">
-          <div className="adl-brand"><img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}} /><div><div className="adl-brand-sub">Admin panel</div></div></div>
+          <div className="adl-brand"><img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}} /><span className="adl-brand-pill">Admin</span></div>
+          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>{orgName}</div>
           <nav className="adl-nav">{NAV.map(({ to, label, Icon }) => (<NavLink key={to} to={to} className={({ isActive }) => "adl-nav-item" + (isActive ? " adl-nav-item--on" : "")}><Icon size={17} strokeWidth={2} /><span className="adl-nav-lbl">{label}</span></NavLink>))}</nav>
           <div className="adl-footer"><div className="adl-user"><div className="adl-av">{user?.firstName?.[0]?.toUpperCase() ?? "A"}</div><div><div className="adl-uname">{user?.firstName} {user?.lastName}</div><div className="adl-urole">Admin</div></div></div><button className="adl-signout" onClick={() => { signOut(); navigate("/"); }}>Sign out</button></div>
         </aside>
-        <main className="adl-main"><div className="adl-topbar"><button className="adl-toggle" onClick={toggle}>{dark ? <><Sun size={14}/><span>Light mode</span></> : <><Moon size={14}/><span>Dark mode</span></>}</button></div><Outlet context={{ dark }} /></main>
+        <main className="adl-main"><div className="adl-topbar"><button className="adl-hamburger" onClick={() => setMenuOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><button className="adl-toggle" onClick={toggle}>{dark ? <><Sun size={14}/><span>Light mode</span></> : <><Moon size={14}/><span>Dark mode</span></>}</button></div><Outlet context={{ dark }} /></main>
       </div>
     </ThemeContext.Provider>
   );
 }
+
+
+
+
+
+
+
 
 
 

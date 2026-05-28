@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 // @ts-ignore
 import { api } from "../../../../convex/_generated/api";
@@ -192,6 +192,7 @@ export function BookingRulesPage() {
           </div>
         </div>
       </div>
+      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto"}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
     </>
   );
 }

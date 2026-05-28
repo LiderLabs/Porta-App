@@ -17,9 +17,13 @@ export function AppLayout() {
   const avatarInitial = displayName?.[0]?.toUpperCase() ?? "?";
   const unreadCount = useQuery(api.directMessages.unreadCount, user?.id ? { clerkUserId: user.id } : "skip") ?? 0;
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"dark"|"light">(() =>
     (localStorage.getItem("porta-theme") as "dark"|"light") ?? "dark"
   );
+  const orgSettings = useQuery(api.orgSettings.get);
+  const myOrg = useQuery(api.orgSettings.getMyOrg);
+  const orgName = myOrg?.name || orgSettings?.branding?.appName || "Porta";
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -124,6 +128,7 @@ export function AppLayout() {
           flex-shrink: 0;
         }
         .brand-name  { font-size: 15px; font-weight: 700; color: var(--text); }
+        .brand-pill { font-size: .65rem; font-weight: 700; color: var(--accent); background: var(--accent-bg); padding: 2px 8px; border-radius: 20px; margin-left: 4px; letter-spacing: .04em; text-transform: uppercase; }
         .brand-sub   { font-size: 11px; color: var(--muted); }
 
         .sidebar-nav {
@@ -182,9 +187,13 @@ export function AppLayout() {
           border-color: rgba(239,68,68,0.3);
         }
 
-        /* -- Main — NO top header bar -- */
+        /* -- Main � NO top header bar -- */
         .app-main { flex: 1; overflow-y: auto; min-width: 0; background: var(--bg); display: flex; flex-direction: column; }
-        .app-content { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+        .app-content { flex: 1; display: flex; flex-direction: column; min-height: 0; } }
+        .staff-footer-bar { padding: 20px 24px; font-size: 11px; color: var(--accent, #3fb950); text-align: center; background: transparent; letter-spacing: 0.04em; font-weight: 500; width: 100%; display: block; }
+        .staff-topbar { display:flex; justify-content:flex-end; align-items:center; padding:12px 24px 0; background:var(--bg); }
+        .staff-topbar-toggle { display:flex; align-items:center; gap:7px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:6px 14px; cursor:pointer; font-size:.78rem; font-weight:600; color:var(--muted); font-family:inherit; }
+        .staff-topbar-toggle:hover { color:var(--text); background:var(--hov); }
 
         /* Loading */
         .page-loading {
@@ -194,21 +203,71 @@ export function AppLayout() {
         }
 
         /* Responsive: slim sidebar on mobile */
-        @media (max-width: 700px) {
-          .sidebar { width: 56px; min-width: 56px; }
-          .brand-name, .brand-sub, .nav-label,
-          .user-name, .user-role, .logout-btn, .theme-toggle { display: none; }
-          .sidebar-brand { justify-content: center; padding: 14px 0; }
-          .nav-item { justify-content: center; padding: 10px 0; }
-          .sidebar-footer { align-items: center; padding: 10px 4px 12px; }
+        @media (max-width: 768px) {
+          .app-layout { display: block; }
+          .sidebar { display: none; }
+          .mobile-header { display: flex !important; }
+          .app-main { width: 100%; max-width: 100%; }
         }
+        .mobile-header {
+          display: none; align-items: center; justify-content: space-between;
+          padding: 12px 16px; background: var(--sidebar);
+          border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10;
+        }
+        .hamburger-btn {
+          display: flex; align-items: center; justify-content: center;
+          background: none; border: 1px solid var(--border); border-radius: 8px;
+          padding: 7px; cursor: pointer; color: var(--muted);
+        }
+        .hamburger-btn:hover { background: var(--hov); color: var(--text); }
+        .drawer { position: fixed; inset: 0; z-index: 200; display: flex; }
+        .drawer-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+        .drawer-panel {
+          position: relative; width: 260px; background: var(--sidebar);
+          border-right: 1px solid var(--border); display: flex;
+          flex-direction: column; height: 100vh; animation: slideIn .2s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
       `}</style>
 
       {/* Sidebar */}
-      <aside className="sidebar">
+      {menuOpen && (
+          <div className="drawer">
+            <div className="drawer-overlay" onClick={() => setMenuOpen(false)} />
+            <div className="drawer-panel">
+              <div className="sidebar-brand" style={{padding:"18px 16px 14px",borderBottom:"1px solid var(--border)"}}>
+                <img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}} />
+                <span className="brand-pill">Staff</span>
+                <button onClick={() => setMenuOpen(false)} style={{marginLeft:"auto",background:"none",border:"none",cursor:"pointer",color:"var(--muted)",fontSize:"18px",lineHeight:1,padding:"0 4px"}}>&#x2715;</button>
+              </div>
+              <nav className="sidebar-nav">
+          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid var(--border)"}}>{orgName}</div>
+                {navItems.map(item => (
+                  <button key={item.path} className={`nav-item${location.pathname === item.path ? " active" : ""}`} onClick={() => { navigate(item.path); setMenuOpen(false); }}>
+                    {item.icon}<span className="nav-label">{item.label}</span>
+                    {item.label === "Messages" && unreadCount > 0 && (<span style={{marginLeft:"auto",minWidth:18,height:18,borderRadius:9,background:"var(--accent)",color:"#fff",fontSize:10,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px"}}>{unreadCount}</span>)}
+                  </button>
+                ))}
+              </nav>
+              <div className="sidebar-footer">
+                <div className="user-info"><div className="user-avatar">{avatarInitial}</div><div><span className="user-name">{displayName}</span><span className="user-role">Staff</span></div></div>
+                <button className="logout-btn" onClick={async () => { await signOut(); navigate("/login"); }}>Sign out</button>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="mobile-header">
+          <button className="hamburger-btn" onClick={() => setMenuOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <img src="/Porta.png" alt="Porta" style={{height:"24px",width:"auto"}} />
+          <div style={{width:"34px"}} />
+        </div>
+        <aside className="sidebar">
         <div className="sidebar-brand">
           <img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}} />
+          <span className="brand-pill">Staff</span>
         </div>
+          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid var(--border)"}}>{orgName}</div>
 
         <nav className="sidebar-nav">
           {navItems.map(item => (
@@ -239,13 +298,13 @@ export function AppLayout() {
             </div>
           </div>
 
-          {/* Theme toggle in sidebar */}
-          <button className="theme-toggle" onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}>
-            {theme === "dark"
-              ? <><Sun size={14} /><span>Light mode</span></>
-              : <><Moon size={14} /><span>Dark mode</span></>
-            }
-          </button>
+
+
+
+
+
+
+
 
           <button className="logout-btn" onClick={async () => { await signOut(); navigate("/login"); }}>
             Sign out
@@ -253,15 +312,29 @@ export function AppLayout() {
         </div>
       </aside>
 
-      {/* Main — content fills full width, no header bar */}
+      {/* Main � content fills full width, no header bar */}
       <main className="app-main">
+        <div className="staff-topbar">
+          <button className="staff-topbar-toggle" onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}>
+            {theme === "dark"
+              ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><span>Light mode</span></>
+              : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark mode</span></>}
+          </button>
+        </div>
         <div className="app-content">
           <Outlet />
+
         </div>
+      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto"}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
       </main>
     </div>
   );
 }
+
+
+
+
+
 
 
 

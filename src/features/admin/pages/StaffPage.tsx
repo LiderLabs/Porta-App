@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState } from "react";
 import { parseError } from "../../../lib/parseError";
 import { useQuery, useMutation, useAction } from "convex/react";
@@ -501,7 +501,7 @@ export function StaffPage() {
                 <div className="sp-modal-note">
                   A password reset link will be sent to <strong>{resetTarget.email}</strong>.
                 </div>
-                {resetDone && <div className="sp-success">✓ Reset link sent to {resetTarget.email}</div>}
+                {resetDone && <div className="sp-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg> Reset link sent to {resetTarget.email}</div>}
                 {resetError && <div className="sp-error">{resetError}</div>}
               </div>
               <div className="sp-modal-ft">
@@ -522,3 +522,4 @@ export function StaffPage() {
   );
 }
 export default StaffPage;
+

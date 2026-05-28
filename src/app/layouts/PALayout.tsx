@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+﻿import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 // @ts-ignore
@@ -15,9 +15,13 @@ export function PALayout() {
   const displayName = convexUser?.name ?? user?.fullName ?? user?.firstName ?? "";
   const avatarInitial = displayName?.[0]?.toUpperCase() ?? "?";
   const unreadCount = useQuery(api.directMessages.unreadCount, user?.id ? { clerkUserId: user.id } : "skip") ?? 0;
+  const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"dark"|"light">(() =>
     (localStorage.getItem("porta-theme") as "dark"|"light") ?? "dark"
   );
+  const orgSettings = useQuery(api.orgSettings.get);
+  const myOrg = useQuery(api.orgSettings.getMyOrg);
+  const orgName = myOrg?.name || orgSettings?.branding?.appName || "Porta";
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("porta-theme", theme);
@@ -58,13 +62,55 @@ export function PALayout() {
         .pal-theme{display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;width:100%;}
         .pal-theme:hover{background:var(--hov);color:var(--text);}
         .pal-main{flex:1;overflow-y:auto;min-width:0;background:var(--bg);}
-        .pal-content{padding:28px;}
+.pal-content{padding:28px;} }
+        .pal-footer-bar { padding: 20px 24px; font-size: 11px; color: var(--accent, #3fb950); text-align: center; background: transparent; letter-spacing: 0.04em; font-weight: 500; width: 100%; display: block; }
+        .pal-topbar{display:flex;justify-content:flex-end;align-items:center;padding:12px 24px 0;background:var(--bg);}
+        .pal-topbar-toggle{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);font-family:inherit;}
+        .pal-topbar-toggle:hover{color:var(--text);background:var(--hov);}
+        .pal-mobile-header{display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--sidebar);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
+        .pal-hamburger{display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border);border-radius:8px;padding:7px;cursor:pointer;color:var(--muted);}
+        .pal-hamburger:hover{background:var(--hov);color:var(--text);}
+        .pal-drawer{position:fixed;inset:0;z-index:200;display:flex;}
+        .pal-drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);}
+        .pal-drawer-panel{position:relative;width:260px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;animation:palSlide .2s ease;}
+        @keyframes palSlide{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+        @media(max-width:768px){.pal-root{display:block;}.pal-sidebar{display:none!important;}.pal-mobile-header{display:flex!important;}.pal-main{width:100%;max-width:100%;}.pal-content{padding:16px 12px;}}
       `}</style>
-      <aside className="pal-sidebar">
+      {menuOpen && (
+          <div className="pal-drawer">
+            <div className="pal-drawer-overlay" onClick={() => setMenuOpen(false)} />
+            <div className="pal-drawer-panel">
+              <div className="pal-brand">
+                <img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}}/>
+                <span className="pal-brand-role">PA</span>
+                <button onClick={() => setMenuOpen(false)} style={{marginLeft:"auto",background:"none",border:"none",cursor:"pointer",color:"var(--muted)",fontSize:"18px",lineHeight:1,padding:"0 4px"}}>&#x2715;</button>
+              </div>
+              <nav className="pal-nav">
+          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid var(--border)"}}>{orgName}</div>
+                {navItems.map(item=>(
+                  <NavLink key={item.path} to={item.path} onClick={() => setMenuOpen(false)} className={({isActive})=>isActive?"pal-nav-item active":"pal-nav-item"}>
+                    {item.icon}{item.label}{item.badge&&<span className="pal-badge">{item.badge}</span>}
+                  </NavLink>
+                ))}
+              </nav>
+              <div className="pal-footer">
+                <div className="pal-user"><div className="pal-avatar">{avatarInitial}</div><div><div className="pal-user-name">{displayName}</div><div className="pal-user-role">PA / Secretary</div></div></div>
+                <button className="pal-signout" onClick={()=>signOut(()=>navigate("/login"))}>Sign out</button>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="pal-mobile-header">
+          <button className="pal-hamburger" onClick={() => setMenuOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <img src="/Porta.png" alt="Porta" style={{height:"24px",width:"auto"}} />
+          <span className="pal-brand-role" style={{fontSize:"10px"}}>PA</span>
+        </div>
+        <aside className="pal-sidebar">
         <div className="pal-brand">
           <img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}}/>
           <span className="pal-brand-role">PA</span>
         </div>
+          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid var(--border)"}}>{orgName}</div>
         <nav className="pal-nav">
           {navItems.map(item=>(
             <NavLink key={item.path} to={item.path} className={({isActive})=>isActive?"pal-nav-item active":"pal-nav-item"}>
@@ -81,17 +127,31 @@ export function PALayout() {
               <div className="pal-user-role">PA / Secretary</div>
             </div>
           </div>
-          <button className="pal-theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")}>
-            {theme==="dark"?<Sun size={14}/>:<Moon size={14}/>}
-            {theme==="dark"?"Light mode":"Dark mode"}
-          </button>
-          <button className="pal-signout" onClick={()=>signOut(()=>navigate("/login"))}>Sign out</button>
+          {/* theme toggle moved to topbar */}
+
+
+
+
         </div>
       </aside>
-      <main className="pal-main">
+        <main className="pal-main">
+          <div className="pal-topbar">
+            <button className="pal-topbar-toggle" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")}>
+              {theme==="dark"
+                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><span>Light mode</span></>
+                : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark mode</span></>}
+            </button>
+          </div>
         <div className="pal-content"><Outlet/></div>
+
+      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto"}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
       </main>
     </div>
   );
 }
 export default PALayout;
+
+
+
+
+
