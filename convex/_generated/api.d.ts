@@ -8,13 +8,55 @@
  * @module
  */
 
+import type * as analytics from "../analytics.js";
+import type * as blacklist from "../blacklist.js";
+import type * as bookingRules from "../bookingRules.js";
+import type * as checkInSettings from "../checkInSettings.js";
+import type * as debugPorta from "../debugPorta.js";
+import type * as departments from "../departments.js";
+import type * as directMessages from "../directMessages.js";
+import type * as email from "../email.js";
+import type * as http from "../http.js";
+import type * as invites from "../invites.js";
+import type * as messages from "../messages.js";
+import type * as notifications from "../notifications.js";
+import type * as orgSettings from "../orgSettings.js";
+import type * as paAssignments from "../paAssignments.js";
+import type * as scheduling from "../scheduling.js";
+import type * as settings from "../settings.js";
+import type * as staff from "../staff.js";
+import type * as superadmin from "../superadmin.js";
+import type * as users from "../users.js";
+import type * as visitors from "../visitors.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  analytics: typeof analytics;
+  blacklist: typeof blacklist;
+  bookingRules: typeof bookingRules;
+  checkInSettings: typeof checkInSettings;
+  debugPorta: typeof debugPorta;
+  departments: typeof departments;
+  directMessages: typeof directMessages;
+  email: typeof email;
+  http: typeof http;
+  invites: typeof invites;
+  messages: typeof messages;
+  notifications: typeof notifications;
+  orgSettings: typeof orgSettings;
+  paAssignments: typeof paAssignments;
+  scheduling: typeof scheduling;
+  settings: typeof settings;
+  staff: typeof staff;
+  superadmin: typeof superadmin;
+  users: typeof users;
+  visitors: typeof visitors;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.

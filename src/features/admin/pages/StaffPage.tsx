@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState } from "react";
+import { parseError } from "../../../lib/parseError";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { useUser } from "@clerk/clerk-react";
 // @ts-ignore
@@ -167,7 +168,7 @@ export function StaffPage() {
       setShowModal(false);
       setForm({ name: "", email: "", role: "employee", department: "" });
     } catch (e: any) {
-      setError(e.message ?? "Failed to send invite");
+      setError(parseError(e));
     } finally { setSub(false); }
   };
 
@@ -185,7 +186,7 @@ export function StaffPage() {
       await resetPassword({ email: resetTarget.email });
       setResetDone(true);
     } catch (e: any) {
-      setResetError(e.message ?? "Failed to send reset email");
+      setResetError(parseError(e));
     } finally { setResetSending(false); }
   };
 

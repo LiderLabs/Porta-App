@@ -1,13 +1,15 @@
-﻿import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { useUser } from "@clerk/clerk-react";
 import LoginPage from "./features/auth/pages/LoginPage";
+import SignUpPage from "./features/auth/pages/SignUpPage";
 import AuthGuard from "./features/auth/components/AuthGuard";
 import RoleRouter from "./features/auth/components/RoleRouter";
 import { AdminLayout }            from "./app/layouts/AdminLayout";
 import { AppLayout as ReceptionLayout } from "./app/layouts/ReceptionLayout";
 import { AppLayout as StaffLayout }     from "./app/layouts/StaffLayout";
 import { PALayout }               from "./app/layouts/PALayout";
+
 
 import { AppointmentsPage }       from "./features/reception/pages/AppointmentsPage";
 import { SchedulingPage }         from "./features/reception/pages/SchedulingPage";
@@ -32,7 +34,7 @@ import { SecurityPage }           from "./features/admin/pages/SecurityPage";
 import { CheckInFormPage }        from "./features/admin/pages/CheckInFormPage";
 import { SetupPage }              from "./features/admin/pages/SetupPage";
 
-// ── Overlay context ──────────────────────────────────────────────────────────
+// -- Overlay context ----------------------------------------------------------
 const OverlayCtx = createContext<{ hide: () => void }>({ hide: () => {} });
 export const useHideOverlay = () => useContext(OverlayCtx);
 
@@ -88,7 +90,7 @@ function WrappedRouteOverlay() {
   );
 }
 
-// ── Role guard: redirects away if user doesn't have the required role ────────
+// -- Role guard: redirects away if user doesn't have the required role --------
 function RoleGuard({ allowed, fallback = "/" }: { allowed: string[]; fallback?: string }) {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
@@ -103,6 +105,7 @@ function AppRoutes() {
       <WrappedRouteOverlay />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
 
         <Route element={<AuthGuard />}>
           <Route path="/" element={<RoleRouter />} />

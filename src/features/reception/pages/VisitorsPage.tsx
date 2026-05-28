@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import type { Doc } from "../../../../convex/_generated/dataModel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type Filter = "ALL" | "IN" | "OUT";
@@ -13,7 +12,7 @@ function hashColor(name: string) {
   return `linear-gradient(135deg,hsl(${hue},55%,28%),hsl(${(hue+50)%360},65%,20%))`;
 }
 
-function exportCSV(visitors: Doc<"visitors">[]) {
+function exportCSV(visitors: any[]) {
   const rows = [
     ["Name","Company","Phone","Email","Purpose","Status","Check-in Time"],
     ...visitors.map(v=>[v.fullName,v.company??"",v.phone??"",v.email??"",v.purpose??"",v.status,new Date(v.checkInTime).toLocaleString()]),
@@ -27,7 +26,7 @@ function exportCSV(visitors: Doc<"visitors">[]) {
 export function VisitorsPage() {
   const [filter, setFilter]   = useState<Filter>("ALL");
   const [search, setSearch]   = useState("");
-  const [selected, setSelected] = useState<Doc<"visitors"> | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [params] = useSearchParams();
   const navigate  = useNavigate();
