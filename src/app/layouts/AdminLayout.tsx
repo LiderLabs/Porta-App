@@ -1,4 +1,6 @@
 ﻿import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import { LayoutDashboard, Users, Building2, CalendarCog, ClipboardList, ShieldAlert, Sun, Moon } from "lucide-react";
 import { useState, useEffect, createContext, useContext } from "react";
@@ -132,6 +134,8 @@ export function AdminLayout() {
     </ThemeContext.Provider>
   );
 }
+
+
 
 
 

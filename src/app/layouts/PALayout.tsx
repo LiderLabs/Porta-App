@@ -128,7 +128,7 @@ export function PALayout() {
             </div>
           </div>
           {/* theme toggle moved to topbar */}
-
+          <button className="pal-signout" onClick={()=>signOut(()=>navigate("/login"))}>Sign out</button>
 
 
 
@@ -150,6 +150,8 @@ export function PALayout() {
   );
 }
 export default PALayout;
+
+
 
 
 
