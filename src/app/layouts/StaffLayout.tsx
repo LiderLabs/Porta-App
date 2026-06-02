@@ -100,7 +100,7 @@ export function AppLayout() {
         }
 
         body {
-          font-family: 'DM Sans', sans-serif;
+          font-family: 'Plus Jakarta Sans', sans-serif;
           background: var(--bg);
           color: var(--text);
         }
@@ -200,7 +200,7 @@ export function AppLayout() {
         .page-loading {
           display: flex; align-items: center; justify-content: center;
           height: 100vh; color: var(--muted);
-          font-family: 'DM Sans', sans-serif;
+          font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* Responsive: slim sidebar on mobile */
@@ -327,6 +327,7 @@ export function AppLayout() {
     </div>
   );
 }
+
 
 
 

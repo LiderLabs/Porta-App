@@ -37,7 +37,7 @@ export function AdminLayout() {
     <ThemeContext.Provider value={{ dark, toggle }}>
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'DM Sans',sans-serif;background:${t.bg};color:${t.text};transition:background .2s,color .2s}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:${t.bg};color:${t.text};transition:background .2s,color .2s}
         .adl-wrap{display:flex;min-height:100vh}
         .adl-sidebar{width:220px;min-width:220px;background:${t.sidebar};border-right:1px solid ${t.border};display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:10}
         .adl-brand{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid ${t.border}}
@@ -136,6 +136,7 @@ export function AdminLayout() {
     </ThemeContext.Provider>
   );
 }
+
 
 
 

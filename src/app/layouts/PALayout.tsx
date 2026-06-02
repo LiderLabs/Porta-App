@@ -43,7 +43,7 @@ export function PALayout() {
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         :root[data-theme="dark"]  {--bg:#0d1117;--sidebar:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--surface:#21262d;--hov:#2d333b;--accent:#a78bfa;--accent-bg:rgba(167,139,250,0.12);--danger:#f85149;--blue:#58a6ff;}
         :root[data-theme="light"] {--bg:#f8fafc;--sidebar:#ffffff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--surface:#ffffff;--hov:#f1f5f9;--accent:#7c3aed;--accent-bg:rgba(124,58,237,0.10);--danger:#dc2626;--blue:#2563eb;}
-        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);}
         .pal-root{display:flex;height:100vh;overflow:hidden;}
         .pal-sidebar{width:220px;min-width:220px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;}
         .pal-brand{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid var(--border);}
@@ -147,6 +147,7 @@ export function PALayout() {
   );
 }
 export default PALayout;
+
 
 
 
