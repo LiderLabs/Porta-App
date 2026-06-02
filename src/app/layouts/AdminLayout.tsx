@@ -2,7 +2,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useUser, useClerk } from "@clerk/clerk-react";
-import { LayoutDashboard, Users, Building2, CalendarCog, ClipboardList, ShieldAlert, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Users, Building2, CalendarCog, ClipboardList, ShieldAlert, Sun, Moon, DoorOpen } from "lucide-react";
 import { useState, useEffect, createContext, useContext } from "react";
 
 export const ThemeContext = createContext<{ dark: boolean; toggle: () => void }>({ dark: true, toggle: () => {} });
@@ -14,6 +14,7 @@ const NAV = [
   { to: "/admin/departments",   label: "Departments",      Icon: Building2 },
   { to: "/admin/booking-rules", label: "Appointment rules",Icon: CalendarCog },
   { to: "/admin/checkin-form",  label: "Check-in form",    Icon: ClipboardList },
+  { to: "/admin/rooms", label: "Rooms", Icon: DoorOpen },
   { to: "/admin/security",      label: "Security",         Icon: ShieldAlert },
 ];
 
@@ -22,6 +23,7 @@ export function AdminLayout() {
   const { signOut } = useClerk();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [popOpen, setPopOpen] = useState(false);
   const orgSettings = useQuery(api.orgSettings.get);
   const myOrg = useQuery(api.orgSettings.getMyOrg);
   const orgName = myOrg?.name || orgSettings?.branding?.appName || "Porta";
@@ -58,8 +60,8 @@ export function AdminLayout() {
         .adl-main{flex:1;overflow-y:auto;min-width:0;background:${t.bg}}
         .adl-footer-bar{padding:20px 24px;font-size:11px;color:${t.accent};text-align:center;background:transparent;letter-spacing:0.04em;font-weight:500;width:100%;display:block;}
         .adl-topbar{display:flex;justify-content:flex-end;padding:14px 32px 0;background:${t.bg}}
-        .adl-toggle{display:flex;align-items:center;gap:7px;background:${t.surface};border:1px solid ${t.border};border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.78rem;font-weight:600;color:${t.textMuted};font-family:inherit}
-        .adl-toggle:hover{color:${t.text};background:${t.surfaceHov}}
+        .adl-toggle{background:none;border:1px solid ${t.border};border-radius:8px;padding:7px;cursor:pointer;color:${t.textMuted};display:flex;align-items:center;};border:1px solid ${t.border};border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.78rem;font-weight:600;color:${t.textMuted};font-family:inherit}
+        .adl-toggle:hover{color:${t.text};background:${t.surfaceHov};};background:${t.surfaceHov}}
         @media(max-width:768px){.adl-wrap{display:block}.adl-sidebar{display:none}.adl-hamburger{display:flex!important}.adl-topbar{padding:10px 16px 0;justify-content:space-between;align-items:center}.adl-main{width:100%;max-width:100%;display:block}.ad-page{padding:16px 12px;max-width:100%;box-sizing:border-box}.ad-stat-grid{grid-template-columns:repeat(2,1fr)}.ad-modal{max-width:100%;margin:0 12px}}
         .adl-drawer{position:fixed;inset:0;z-index:200;display:flex}
         .adl-drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55)}
@@ -119,7 +121,7 @@ export function AdminLayout() {
               <div className="adl-brand"><img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}} /><span className="adl-brand-pill">Admin</span></div>
           <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>{orgName}</div>
               <nav className="adl-nav">{NAV.map(({ to, label, Icon }) => (<NavLink key={to} to={to} onClick={() => setMenuOpen(false)} className={({ isActive }) => "adl-nav-item" + (isActive ? " adl-nav-item--on" : "")}><Icon size={17} strokeWidth={2} /><span className="adl-nav-lbl">{label}</span></NavLink>))}</nav>
-              <div className="adl-footer"><div className="adl-user"><div className="adl-av">{user?.firstName?.[0]?.toUpperCase() ?? "A"}</div><div><div className="adl-uname">{user?.firstName} {user?.lastName}</div><div className="adl-urole">Admin</div></div></div><button className="adl-signout" onClick={() => { signOut(); navigate("/"); }}>Sign out</button></div>
+              <div className="adl-footer"><div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"}><div className="adl-av">{user?.firstName?.[0]?.toUpperCase()??"A"}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text,#e6edf3)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{user?.firstName} {user?.lastName}</div><div style={{fontSize:".7rem",color:"var(--muted,#8b949e)"}}>Admin</div></div></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/admin/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit"}}>Profile</button><button onClick={()=>{signOut();navigate("/");}} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Sign out</button></div>)}</div></div>
             </div>
           </div>
         )}
@@ -127,13 +129,23 @@ export function AdminLayout() {
           <div className="adl-brand"><img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}} /><span className="adl-brand-pill">Admin</span></div>
           <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>{orgName}</div>
           <nav className="adl-nav">{NAV.map(({ to, label, Icon }) => (<NavLink key={to} to={to} className={({ isActive }) => "adl-nav-item" + (isActive ? " adl-nav-item--on" : "")}><Icon size={17} strokeWidth={2} /><span className="adl-nav-lbl">{label}</span></NavLink>))}</nav>
-          <div className="adl-footer"><div className="adl-user"><div className="adl-av">{user?.firstName?.[0]?.toUpperCase() ?? "A"}</div><div><div className="adl-uname">{user?.firstName} {user?.lastName}</div><div className="adl-urole">Admin</div></div></div><button className="adl-signout" onClick={() => { signOut(); navigate("/"); }}>Sign out</button></div>
+          <div className="adl-footer"><div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"}><div className="adl-av">{user?.firstName?.[0]?.toUpperCase()??"A"}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text,#e6edf3)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{user?.firstName} {user?.lastName}</div><div style={{fontSize:".7rem",color:"var(--muted,#8b949e)"}}>Admin</div></div></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/admin/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit"}}>Profile</button><button onClick={()=>{signOut();navigate("/");}} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Sign out</button></div>)}</div></div>
         </aside>
-        <main className="adl-main"><div className="adl-topbar"><button className="adl-hamburger" onClick={() => setMenuOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><button className="adl-toggle" onClick={toggle}>{dark ? <><Sun size={14}/><span>Light mode</span></> : <><Moon size={14}/><span>Dark mode</span></>}</button></div><Outlet context={{ dark }} /></main>
+        <main className="adl-main"><div className="adl-topbar"><button className="adl-hamburger" onClick={() => setMenuOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><button className="adl-toggle" onClick={toggle}>{dark ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}</button></div><Outlet context={{ dark }} /></main>
       </div>
     </ThemeContext.Provider>
   );
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

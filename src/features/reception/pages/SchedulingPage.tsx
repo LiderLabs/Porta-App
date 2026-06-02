@@ -233,11 +233,12 @@ function LiveCalendar({ visits, blockedSlots, onSelectVisit }: {
                     </div>
                   ))}
                   {dayBlocked.length > 1 && <div className="calendar-more">+{dayBlocked.length-1} blocked</div>}
+
                   {dayVisits.slice(0,2).map((v: any) => (
-                    <div key={v._id} className={`calendar-event calendar-event--${v.status}`}
-                      onClick={() => onSelectVisit(v)} style={{ cursor:"pointer" }}>
-                      {v.visitorName.split(" ")[0]}
-                    </div>
+                    <button key={v._id} type="button" className={`calendar-event calendar-event--${v.status}`}
+                      onClick={(e) => { e.stopPropagation(); onSelectVisit(v); }} style={{ cursor:"pointer", border:"none", width:"100%", textAlign:"left", background:"inherit", pointerEvents:"auto" }}>
+                      {(v.visitorName ?? "Visitor").split(" ")[0]}
+                    </button>
                   ))}
                   {dayVisits.length > 2 && <div className="calendar-more">+{dayVisits.length-2} more</div>}
                 </div>
@@ -788,7 +789,7 @@ export function SchedulingPage() {
           </div>
 
           {/* ── detail panel (appointments only) ── */}
-          {selectedVisit && !selectedVisit.fullName && (
+      {selectedVisit && (
             <div className="visitor-detail-panel">
               <div className="panel-header">
                 <h3 className="panel-title">Visit details</h3>

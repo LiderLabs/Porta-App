@@ -1,4 +1,4 @@
-import { useQuery } from "convex/react";
+﻿import { useQuery } from "convex/react";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 // @ts-ignore
@@ -24,7 +24,9 @@ export function DashboardPage() {
   const blacklist = useQuery(api.blacklist.list);
 
   const pendingInvites = invites?.filter((i: any) => i.status === "pending").length ?? 0;
+  const org       = useQuery(api.orgSettings.getMyOrg);
 
+  const [copied, setCopied] = useState(false);
   // Theme tokens
   const t = dark ? {
     bg:        "#0d1117",
@@ -319,6 +321,31 @@ export function DashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* Booking link */}
+        {org?.slug && (
+          <div style={{marginTop:18,background:dark?"#161b22":"#fff",border:`1px solid ${dark?"#30363d":"#e2e8f0"}`,borderRadius:12,padding:"18px 20px"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
+              <div>
+                <div style={{fontSize:"0.88rem",fontWeight:700,color:dark?"#e6edf3":"#0f172a"}}>Your booking link</div>
+                <div style={{fontSize:"0.75rem",color:dark?"#8b949e":"#64748b",marginTop:2}}>Share this link with visitors so they can book appointments directly.</div>
+              </div>
+              <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+                <a href={`${window.location.origin.replace("5173","5174")}/book/${org.slug}`} target="_blank" rel="noreferrer"
+                  style={{fontSize:"0.78rem",fontWeight:600,color:"#3fb950",textDecoration:"none",padding:"6px 12px",border:"1px solid rgba(63,185,80,0.3)",borderRadius:7,background:"rgba(63,185,80,0.08)"}}>
+                  Preview ↗
+                </a>
+                <button onClick={()=>{navigator.clipboard.writeText(`${window.location.origin.replace("5173","5174")}/book/${org.slug}`);setCopied(true);setTimeout(()=>setCopied(false),2000);}}
+                  style={{fontSize:"0.78rem",fontWeight:700,padding:"6px 14px",borderRadius:7,border:"none",background:copied?"#3fb950":"rgba(63,185,80,0.15)",color:copied?"#fff":"#3fb950",cursor:"pointer",fontFamily:"inherit",transition:"all .2s"}}>
+                  {copied?"✓ Copied!":"Copy link"}
+                </button>
+              </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:8,background:dark?"#0d1117":"#f8fafc",border:`1px solid ${dark?"#30363d":"#e2e8f0"}`,borderRadius:8,padding:"9px 14px",fontFamily:"monospace",fontSize:"0.8rem",color:dark?"#8b949e":"#64748b",overflowX:"auto",whiteSpace:"nowrap"}}>
+              🔗 {window.location.origin.replace("5173","5174")}/book/{org.slug}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

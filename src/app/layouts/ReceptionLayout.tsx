@@ -14,6 +14,7 @@ export function AppLayout() {
   const avatarInitial = displayName?.[0]?.toUpperCase() ?? "?";
   const unreadCount = useQuery(api.directMessages.unreadCount, user?.id ? { clerkUserId: user.id } : "skip") ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [popOpen, setPopOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [theme, setTheme] = useState<"dark"|"light">(() => (localStorage.getItem("porta-theme") as "dark"|"light") ?? "dark");
   const orgSettings = useQuery(api.orgSettings.get);
@@ -55,7 +56,7 @@ export function AppLayout() {
         .logout-btn:hover { background:rgba(239,68,68,.08); color:#ef4444; border-color:rgba(239,68,68,.3); }
         .theme-toggle { display:flex; align-items:center; gap:7px; background:none; border:1px solid var(--border); border-radius:8px; padding:7px 12px; font-size:.78rem; font-weight:600; color:var(--muted); cursor:pointer; font-family:inherit; width:100%; }
         .theme-toggle:hover { background:var(--hov); color:var(--text); }
-        .app-main { flex:1; overflow-y:auto; min-width:0; background:var(--bg); display:flex; flex-direction:column; }
+        .app-main { flex:1; overflow-y:auto; min-width:0; background:var(--bg); display:flex; flex-direction:column; position:relative; isolation:isolate; }
         .app-header { display:flex; align-items:center; justify-content:space-between; padding:12px 28px; border-bottom:1px solid var(--border); background:var(--sidebar); gap:16px; }
         .header-search { display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:7px 12px; flex:1; max-width:320px; }
         .header-search-input { background:none; border:none; outline:none; font-size:.85rem; color:var(--text); font-family:inherit; width:100%; }
@@ -137,17 +138,7 @@ export function AppLayout() {
             Analytics
           </NavLink>
         </nav>
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">{avatarInitial}</div>
-            <div><span className="user-name">{displayName}</span><span className="user-role">Receptionist</span></div>
-          </div>
-          {/* theme toggle moved to topbar */}
-
-
-
-          <button className="logout-btn" onClick={async () => { await signOut(); navigate("/login"); }}>Sign out</button>
-        </div>
+        <div className="sidebar-footer"><div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"}><div className="user-avatar">{avatarInitial}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{displayName}</div><div style={{fontSize:".7rem",color:"var(--muted)"}}>Receptionist</div></div></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/reception/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit"}}>Profile</button><button onClick={async()=>{await signOut();navigate("/login");}} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Sign out</button></div>)}</div></div>
 
       </aside>
       <main className="app-main">
@@ -162,10 +153,7 @@ export function AppLayout() {
             <button className="header-icon-btn" onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}>
               {theme === "dark" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}
             </button>
-            <div className="header-user-chip">
-              <div className="user-avatar" style={{width:"30px",height:"30px",fontSize:"12px"}}>{avatarInitial}</div>
-              <span className="header-user-name">{displayName}</span>
-            </div>
+            <div className="header-user-chip"><div className="user-avatar" style={{width:"30px",height:"30px",fontSize:"12px"}}>{avatarInitial}</div></div>
           </div>
         </header>
         <div className="app-content"><Outlet /></div>
@@ -175,6 +163,15 @@ export function AppLayout() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
 
 
 

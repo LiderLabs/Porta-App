@@ -1,3 +1,4 @@
+﻿import { LiveCalendar } from "../../shared/LiveCalendar";
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -65,7 +66,7 @@ export function SchedulePage() {
   const rejectVisit    = useMutation(api.scheduling.reject);
   const markNoShow     = useMutation(api.scheduling.markNoShow);
   const rescheduleVisit = useMutation(api.scheduling.reschedule);
-  const createVisit    = useMutation(api.scheduling.create);
+  const createVisit = useMutation(api.scheduling.createByStaff);
   const blockSlot      = useMutation(api.scheduling.blockSlot);
   const unblockSlot    = useMutation(api.scheduling.unblockSlot);
 
@@ -120,9 +121,10 @@ export function SchedulePage() {
         purpose:        form.purpose        || undefined,
         notes:          form.notes          || undefined,
         scheduledDate:  dt,
+        duration: (() => { if (!form.endTime) return undefined; const e = new Date(`${form.scheduledDate}T${form.endTime}`).getTime(); return e > dt ? Math.round((e-dt)/60000) : undefined; })(),
         hostStaffId:    staffRecord?._id,
       });
-      setForm({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:"", scheduledTime:"", notes:"" });
+      setForm({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:"", scheduledTime:"", notes:"", endTime:"" });
       setShowForm(false);
     } finally { setFormSaving(false); }
   };
@@ -145,7 +147,8 @@ export function SchedulePage() {
     try {
       const dt = new Date(`${rescheduleDate}T${rescheduleTime}`).getTime();
       await rescheduleVisit({ visitId: selectedVisit._id, scheduledDate: dt });
-      setSelectedVisit({ ...selectedVisit, scheduledDate: dt, status: "pending" });
+      setSelectedVisit({ ...selectedVisit, scheduledDate: dt,
+        duration: (() => { if (!form.endTime) return undefined; const e = new Date(`${form.scheduledDate}T${form.endTime}`).getTime(); return e > dt ? Math.round((e-dt)/60000) : undefined; })(), status: "pending" });
       setShowReschedule(false);
       setRescheduleDate(""); setRescheduleTime("");
     } finally { setRescheduleSaving(false); }
@@ -563,6 +566,7 @@ export function SchedulePage() {
                   { key:"visitorPhone",   label:"Phone",         placeholder:"+233 00 000 0000",   type:"tel" },
                   { key:"scheduledDate",  label:"Date",          placeholder:"",                   type:"date",  req:true },
                   { key:"scheduledTime",  label:"Time",          placeholder:"",                   type:"time",  req:true },
+                  { key:"endTime", label:"End time", placeholder:"", type:"time" },
                 ] as any[]).map(({ key, label, placeholder, type, req }) => (
                   <div key={key} className="scp-field">
                     <label className="scp-field-lbl">{label}{req && <span className="scp-req"> *</span>}</label>
@@ -642,4 +646,7 @@ export function SchedulePage() {
     </>
   );
 }
+
+
+
 

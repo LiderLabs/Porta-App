@@ -16,6 +16,7 @@ export function PALayout() {
   const avatarInitial = displayName?.[0]?.toUpperCase() ?? "?";
   const unreadCount = useQuery(api.directMessages.unreadCount, user?.id ? { clerkUserId: user.id } : "skip") ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [popOpen, setPopOpen] = useState(false);
   const [theme, setTheme] = useState<"dark"|"light">(() =>
     (localStorage.getItem("porta-theme") as "dark"|"light") ?? "dark"
   );
@@ -65,7 +66,7 @@ export function PALayout() {
 .pal-content{padding:28px;} }
         .pal-footer-bar { padding: 20px 24px; font-size: 11px; color: var(--accent, #3fb950); text-align: center; background: transparent; letter-spacing: 0.04em; font-weight: 500; width: 100%; display: block; }
         .pal-topbar{display:flex;justify-content:flex-end;align-items:center;padding:12px 24px 0;background:var(--bg);}
-        .pal-topbar-toggle{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);font-family:inherit;}
+        .pal-topbar-toggle{background:none;border:1px solid var(--border);border-radius:8px;padding:7px;cursor:pointer;color:var(--muted);display:flex;align-items:center;}
         .pal-topbar-toggle:hover{color:var(--text);background:var(--hov);}
         .pal-mobile-header{display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--sidebar);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
         .pal-hamburger{display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border);border-radius:8px;padding:7px;cursor:pointer;color:var(--muted);}
@@ -119,28 +120,24 @@ export function PALayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="pal-footer">
-          <div className="pal-user">
-            <div className="pal-avatar">{avatarInitial}</div>
-            <div>
-              <div className="pal-user-name">{displayName}</div>
-              <div className="pal-user-role">PA / Secretary</div>
-            </div>
-          </div>
-          {/* theme toggle moved to topbar */}
-          <button className="pal-signout" onClick={()=>signOut(()=>navigate("/login"))}>Sign out</button>
+        <div className="pal-footer"><div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}}><div className="pal-avatar">{avatarInitial}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{displayName}</div><div style={{fontSize:".7rem",color:"var(--muted)"}}>PA / Secretary</div></div></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/pa/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Profile</button><button onClick={()=>signOut(()=>navigate("/login"))} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Sign out</button></div>)}</div></div>
 
 
 
-        </div>
+
+
+
+
+
+
+
+
+
+
       </aside>
         <main className="pal-main">
           <div className="pal-topbar">
-            <button className="pal-topbar-toggle" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")}>
-              {theme==="dark"
-                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><span>Light mode</span></>
-                : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark mode</span></>}
-            </button>
+            <button className="pal-topbar-toggle" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")}>{theme==="dark" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}</button>
           </div>
         <div className="pal-content"><Outlet/></div>
 
@@ -150,6 +147,13 @@ export function PALayout() {
   );
 }
 export default PALayout;
+
+
+
+
+
+
+
 
 
 

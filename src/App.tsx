@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
+﻿import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { useUser } from "@clerk/clerk-react";
 import LoginPage from "./features/auth/pages/LoginPage";
@@ -17,6 +17,8 @@ import { CheckInPage }            from "./features/reception/pages/CheckInPage";
 import { VisitorsPage }           from "./features/reception/pages/VisitorsPage";
 import { AnalyticsPage }          from "./features/reception/pages/AnalyticsPage";
 import { MessagesPage as ReceptionMessagesPage } from "./features/reception/pages/MessagesPage";
+import { RoomsPage } from "./features/admin/pages/RoomsPage";
+import { ProfilePage } from "./features/shared/ProfilePage";
 
 import { HomePage }               from "./features/staff/pages/HomePage";
 import { SchedulePage }           from "./features/staff/pages/SchedulePage";
@@ -119,6 +121,7 @@ function AppRoutes() {
               <Route path="/reception/visitors"     element={<VisitorsPage />} />
               <Route path="/reception/analytics"    element={<AnalyticsPage />} />
               <Route path="/reception/messages"     element={<ReceptionMessagesPage />} />
+          <Route path="/reception/profile" element={<ProfilePage />} />
             </Route>
           </Route>
 
@@ -128,6 +131,7 @@ function AppRoutes() {
               <Route path="/staff/home"     element={<HomePage />} />
               <Route path="/staff/schedule" element={<SchedulePage />} />
               <Route path="/staff/messages" element={<StaffMessagesPage />} />
+          <Route path="/staff/profile" element={<ProfilePage />} />
             </Route>
           </Route>
 
@@ -137,6 +141,7 @@ function AppRoutes() {
               <Route path="/pa/home"         element={<PAHomePage />} />
               <Route path="/pa/appointments" element={<PAAppointmentsPage />} />
               <Route path="/pa/messages"     element={<PAMessagesPage />} />
+          <Route path="/pa/profile" element={<ProfilePage />} />
             </Route>
           </Route>
 
@@ -150,6 +155,8 @@ function AppRoutes() {
               <Route path="/admin/security"      element={<SecurityPage />} />
               <Route path="/admin/checkin-form"  element={<CheckInFormPage />} />
               <Route path="/admin/setup"         element={<SetupPage />} />
+          <Route path="/admin/profile" element={<ProfilePage />} />
+          <Route path="/admin/rooms" element={<RoomsPage />} />
             </Route>
           </Route>
         </Route>
@@ -167,3 +174,5 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+

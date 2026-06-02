@@ -157,11 +157,15 @@ function LiveCalendar({ visits, blockedSlots, onSelectVisit }: {
                   ))}
                   {dayBlocked.length>1&&<div className="calendar-more">+{dayBlocked.length-1} blocked</div>}
                   {dayVisits.slice(0,2).map((v:any)=>(
-                    <div key={v._id} className={`calendar-event calendar-event--${v.status}`}
-                      onClick={()=>onSelectVisit(v)} style={{cursor:"pointer"}}>
-                      {v.visitorName.split(" ")[0]}
-                    </div>
-                  ))}
+  <div
+    key={v._id}
+    className={`calendar-event calendar-event--${v.status}`}
+    onClick={()=>onSelectVisit(v)}
+    style={{cursor:"pointer"}}
+  >
+    {v.visitorName.split(" ")[0]}
+  </div>
+))}
                   {dayVisits.length>2&&<div className="calendar-more">+{dayVisits.length-2} more</div>}
                 </div>
               </>)}
@@ -359,7 +363,7 @@ export function AppointmentsPage() {
 
   const TAB_NAV: {id:PageTab;label:string;desc:string}[] = [
     {id:"checkin",  label:"Check In",  desc:"Today's arrivals"},
-    {id:"new",      label:"New Visit", desc:"Book an appointment"},
+    {id:"new",      label:"New Appointment", desc:"Book an appointment"},
     {id:"schedule", label:"Schedule",  desc:"All appointments"},
   ];
 
@@ -708,6 +712,7 @@ export function AppointmentsPage() {
         </div>
       )}
 
+      
       {pageTab==="schedule"&&(
         <div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,flexWrap:"wrap"}}>
@@ -785,11 +790,11 @@ export function AppointmentsPage() {
                                         onClick={()=>handleAction(a.action,v)}>{a.label}</button>
                                     ))}
                                     {["checked_in","in_meeting","completed"].includes(v.status)&&(
-                                      <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button>
+                                      <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>🖨 Badge</button>
                                     )}
                                     {["pending","approved","accepted"].includes(v.status)&&(
                                       <button className="action-btn action-btn--reschedule"
-                                        onClick={()=>{setSelectedVisit(v);setShowReschedule(true);}}>&#x21BB; Reschedule</button>
+                                        onClick={()=>{setSelectedVisit(v);setShowReschedule(true);}}>↻ Reschedule</button>
                                     )}
                                     <button className="action-btn action-btn--delete" onClick={()=>deleteVisit({visitId:v._id})}>Delete</button>
                                   </div>
@@ -839,7 +844,7 @@ export function AppointmentsPage() {
                                       {checkingOut===v._id?"...":"Check out"}
                                     </button>
                                   )}
-                                  <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button>
+                                  <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>🖨 Badge</button>
                                 </div>
                               </td>
                             </tr>
@@ -850,84 +855,86 @@ export function AppointmentsPage() {
                   </div>
                 )}
               </div>
-
-              {selectedVisit&&!selectedVisit.fullName&&(
-                <div className="visitor-detail-panel">
-                  <div className="panel-header">
-                    <h3 className="panel-title">Visit details</h3>
-                    <button className="modal-close" onClick={()=>setSelectedVisit(null)}>&times;</button>
-                  </div>
-                  <div className="panel-body">
-                    <div className="panel-avatar">{selectedVisit.visitorName[0].toUpperCase()}</div>
-                    <div className="panel-name">{selectedVisit.visitorName}</div>
-                    <span className={`badge ${STATUS_COLOR[selectedVisit.status]??""}`}
-                      style={{margin:"6px auto 0",display:"block",width:"fit-content"}}>
-                      {STATUS_LABEL[selectedVisit.status]??selectedVisit.status}
-                    </span>
-                    {(TRANSITIONS[selectedVisit.status]??[]).length>0&&(
-                      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:12}}>
-                        {(TRANSITIONS[selectedVisit.status]??[]).map(a=>(
-                          <button key={a.action} className={`action-btn ${a.cls}`} style={{flex:1}}
-                            onClick={()=>handleAction(a.action,selectedVisit)}>{a.label}</button>
-                        ))}
-                      </div>
-                    )}
-                    {["checked_in","in_meeting","completed"].includes(selectedVisit.status)&&(
-                      <button className="action-btn action-btn--badge"
-                        style={{width:"100%",marginTop:8,justifyContent:"center"}}
-                        onClick={()=>printBadge(selectedVisit)}>
-                        \U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print visitor badge
-                      </button>
-                    )}
-                    {["pending","approved","accepted"].includes(selectedVisit.status)&&(
-                      <button className="action-btn action-btn--reschedule"
-                        style={{width:"100%",marginTop:8,justifyContent:"center"}}
-                        onClick={()=>setShowReschedule(true)}>
-                        &#x21BB; Reschedule
-                      </button>
-                    )}
-                    <div className="panel-fields" style={{marginTop:16}}>
-                      {[
-                        {label:"Date & time", value:new Date(selectedVisit.scheduledDate).toLocaleString()},
-                        {label:"Purpose",     value:selectedVisit.purpose},
-                        {label:"Host",        value:selectedVisit.hostName},
-                        {label:"Company",     value:selectedVisit.visitorCompany},
-                        {label:"Email",       value:selectedVisit.visitorEmail},
-                        {label:"Phone",       value:selectedVisit.visitorPhone},
-                        {label:"Notes",       value:selectedVisit.notes},
-                        {label:"Approved by", value:selectedVisit.approvedBy},
-                      ].map(({label,value})=>value?(
-                        <div key={label} className="panel-field">
-                          <span className="panel-field-label">{label}</span>
-                          <span className="panel-field-value">{value}</span>
-                        </div>
-                      ):null)}
-                    </div>
-                    <div className="message-thread">
-                      <div className="message-thread-title">Messages with staff</div>
-                      <div className="message-list">
-                        {messages===undefined?(<div className="card-empty" style={{padding:"12px 0"}}>Loading...</div>)
-                        :messages.length===0?(<div className="card-empty" style={{padding:"12px 0",fontSize:12}}>No messages yet.</div>)
-                        :messages.map((m:any)=>(
-                          <div key={m._id} className={`message-bubble message-bubble--${m.senderRole==="receptionist"?"self":"other"}`}>
-                            <span className="message-sender">{m.senderName}</span>
-                            <span className="message-text">{m.message}</span>
-                            <span className="message-time">{new Date(m.createdAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="message-input-row">
-                        <input className="field-input" placeholder="Message staff..." value={message}
-                          onChange={e=>setMessage(e.target.value)}
-                          onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();handleSend();}}} />
-                        <button className="btn-primary btn-primary--sm" onClick={handleSend} disabled={!message.trim()}>Send</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
+        </div>
+      )}
+
+      {selectedVisit&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setSelectedVisit(null)}>
+          <div style={{background:"var(--surface,#161b22)",border:"1px solid var(--border,#30363d)",borderRadius:14,width:"100%",maxWidth:480,maxHeight:"90vh",overflowY:"auto",padding:28}} onClick={e=>e.stopPropagation()}>
+            <div className="panel-header">
+              <h3 className="panel-title">Visit details</h3>
+              <button className="modal-close" onClick={()=>setSelectedVisit(null)}>&times;</button>
+            </div>
+            <div className="panel-body">
+              <div className="panel-avatar">{(selectedVisit.visitorName??selectedVisit.fullName??"V")[0].toUpperCase()}</div>
+              <div className="panel-name">{selectedVisit.visitorName??selectedVisit.fullName??"Visitor"}</div>
+              <span className={`badge ${STATUS_COLOR[selectedVisit.status]??""}`}
+                style={{margin:"6px auto 0",display:"block",width:"fit-content"}}>
+                {STATUS_LABEL[selectedVisit.status]??selectedVisit.status}
+              </span>
+              {(TRANSITIONS[selectedVisit.status]??[]).length>0&&(
+                <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:12}}>
+                  {(TRANSITIONS[selectedVisit.status]??[]).map(a=>(
+                    <button key={a.action} className={`action-btn ${a.cls}`} style={{flex:1}}
+                      onClick={()=>handleAction(a.action,selectedVisit)}>{a.label}</button>
+                  ))}
+                </div>
+              )}
+              {["checked_in","in_meeting","completed"].includes(selectedVisit.status)&&(
+                <button className="action-btn action-btn--badge"
+                  style={{width:"100%",marginTop:8,justifyContent:"center"}}
+                  onClick={()=>printBadge(selectedVisit)}>
+                  🖨 Print visitor badge
+                </button>
+              )}
+              {["pending","approved","accepted"].includes(selectedVisit.status)&&(
+                <button className="action-btn action-btn--reschedule"
+                  style={{width:"100%",marginTop:8,justifyContent:"center"}}
+                  onClick={()=>setShowReschedule(true)}>
+                  ↻ Reschedule
+                </button>
+              )}
+              <div className="panel-fields" style={{marginTop:16}}>
+                {[
+                  {label:"Date & time", value:new Date(selectedVisit.scheduledDate).toLocaleString()},
+                  {label:"Purpose",     value:selectedVisit.purpose},
+                  {label:"Host",        value:selectedVisit.hostName},
+                  {label:"Company",     value:selectedVisit.visitorCompany},
+                  {label:"Email",       value:selectedVisit.visitorEmail},
+                  {label:"Phone",       value:selectedVisit.visitorPhone},
+                  {label:"Notes",       value:selectedVisit.notes},
+                  {label:"Approved by", value:selectedVisit.approvedBy},
+                ].map(({label,value})=>value?(
+                  <div key={label} className="panel-field">
+                    <span className="panel-field-label">{label}</span>
+                    <span className="panel-field-value">{value}</span>
+                  </div>
+                ):null)}
+              </div>
+              <div className="message-thread">
+                <div className="message-thread-title">Messages with staff</div>
+                <div className="message-list">
+                  {messages===undefined?(<div className="card-empty" style={{padding:"12px 0"}}>Loading...</div>)
+                  :messages.length===0?(<div className="card-empty" style={{padding:"12px 0",fontSize:12}}>No messages yet.</div>)
+                  :messages.map((m:any)=>(
+                    <div key={m._id} className={`message-bubble message-bubble--${m.senderRole==="receptionist"?"self":"other"}`}>
+                      <span className="message-sender">{m.senderName}</span>
+                      <span className="message-text">{m.message}</span>
+                      <span className="message-time">{new Date(m.createdAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="message-input-row">
+                  <input className="field-input" placeholder="Message staff..." value={message}
+                    onChange={e=>setMessage(e.target.value)}
+                    onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();handleSend();}}} />
+                  <button className="btn-primary btn-primary--sm" onClick={handleSend} disabled={!message.trim()}>Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -937,4 +944,3 @@ export function AppointmentsPage() {
     </div>
   );
 }
-
