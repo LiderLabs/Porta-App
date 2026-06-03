@@ -71,10 +71,10 @@ export function DashboardPage() {
   ];
 
   const setupItems = [
-    { label: "Add departments",    done: (depts?.length ?? 0) > 0,           action: () => navigate("/departments") },
-    { label: "Invite staff",       done: (staff?.length ?? 0) > 0,           action: () => navigate("/staff") },
-    { label: "Set appointment rules",  done: !!rules,                             action: () => navigate("/booking-rules") },
-    { label: "Configure security", done: blacklist !== undefined,             action: () => navigate("/security") },
+    { label: "Add departments",    done: (depts?.length ?? 0) > 0,           action: () => navigate("/admin/departments") },
+    { label: "Invite staff",       done: (staff?.length ?? 0) > 0,           action: () => navigate("/admin/staff") },
+    { label: "Set appointment rules",  done: !!rules,                             action: () => navigate("/admin/booking-rules") },
+    { label: "Configure security", done: blacklist !== undefined,             action: () => navigate("/admin/security") },
   ];
 
   return (
@@ -150,10 +150,12 @@ export function DashboardPage() {
         /* Bottom grid */
         .dash-bottom {
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-columns: 1fr 1fr;
           gap: 18px;
+          align-items: start;
         }
         @media (max-width: 900px) { .dash-bottom { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { .dash-bottom { grid-template-columns: 1fr; gap: 12px; } }
 
         .dash-card {
           background: ${t.card};
@@ -175,7 +177,7 @@ export function DashboardPage() {
         .dash-card-link:hover { text-decoration: underline; }
 
         .dash-row {
-          display: flex; align-items: center; gap: 10px;
+          display: flex; align-items: center; gap: 12px;
           padding: 9px 0; border-bottom: 1px solid ${t.border};
         }
         .dash-row:last-child { border-bottom: none; }
@@ -223,7 +225,7 @@ export function DashboardPage() {
             <h1 className="dash-title">Welcome back, {user?.firstName || "there"}</h1>
             <p className="dash-sub">Here's your organisation at a glance.</p>
           </div>
-          <button className="dash-invite" onClick={() => navigate("/staff")}>
+          <button className="dash-invite" onClick={() => navigate("/admin/staff")}>
             + Invite staff
           </button>
         </div>
@@ -247,7 +249,7 @@ export function DashboardPage() {
           <div className="dash-card">
             <div className="dash-card-hd">
               <div className="dash-card-title">Recent staff</div>
-              <button className="dash-card-link" onClick={() => navigate("/staff")}>
+              <button className="dash-card-link" onClick={() => navigate("/admin/staff")}>
                 View all <ChevronRight size={13} />
               </button>
             </div>
@@ -266,8 +268,8 @@ export function DashboardPage() {
             {(!staff || staff.length === 0) && (
               <div className="dash-empty">
                 No staff yet.{" "}
-                <button className="dash-ilink" onClick={() => navigate("/staff")}>
-                  Invite your first team member
+                <button className="dash-ilink" onClick={() => navigate("/admin/staff")}>
+                  Invite your first staff member
                 </button>
               </div>
             )}
@@ -277,7 +279,7 @@ export function DashboardPage() {
           <div className="dash-card">
             <div className="dash-card-hd">
               <div className="dash-card-title">Departments</div>
-              <button className="dash-card-link" onClick={() => navigate("/departments")}>
+              <button className="dash-card-link" onClick={() => navigate("/admin/departments")}>
                 Manage <ChevronRight size={13} />
               </button>
             </div>
@@ -296,15 +298,16 @@ export function DashboardPage() {
             {(!depts || depts.length === 0) && (
               <div className="dash-empty">
                 No departments yet.{" "}
-                <button className="dash-ilink" onClick={() => navigate("/departments")}>
+                <button className="dash-ilink" onClick={() => navigate("/admin/departments")}>
                   Add one
                 </button>
               </div>
             )}
           </div>
 
-          {/* Quick setup */}
-          <div className="dash-card">
+          {/* Quick setup - only show if not all done */}
+          {setupItems.some(s => !s.done) && (
+          <div className="dash-card" style={{gridColumn:"1/-1"}}>
             <div className="dash-card-hd">
               <div className="dash-card-title">Quick setup</div>
             </div>
@@ -321,6 +324,7 @@ export function DashboardPage() {
               </div>
             ))}
           </div>
+          )}
         </div>
 
         {/* Booking link */}
@@ -353,3 +357,6 @@ export function DashboardPage() {
 }
 
 export default DashboardPage;
+
+
+

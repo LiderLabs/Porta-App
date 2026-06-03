@@ -425,7 +425,7 @@ export function StaffPage() {
           <div className="sp-overlay" onClick={() => setShowModal(false)}>
             <div className="sp-modal" onClick={e => e.stopPropagation()}>
               <div className="sp-modal-hd">
-                <div className="sp-modal-title">Invite team member</div>
+                <div className="sp-modal-title">Invite staff</div>
                 <button className="sp-modal-close" onClick={() => setShowModal(false)}><X size={16} /></button>
               </div>
               <div className="sp-modal-body">
@@ -522,4 +522,5 @@ export function StaffPage() {
   );
 }
 export default StaffPage;
+
 
