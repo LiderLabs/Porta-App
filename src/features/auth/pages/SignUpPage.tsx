@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import { useSignUp, useUser } from "@clerk/clerk-react";
 
 const ROLE_LANDING: Record<string, string> = {
@@ -140,3 +140,6 @@ export default function SignUpPage() {
     </>
   );
 }
+
+
+
