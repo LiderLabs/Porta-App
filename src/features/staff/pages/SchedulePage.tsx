@@ -49,7 +49,7 @@ export function SchedulePage() {
 
   const [form, setForm] = useState({
     visitorName: "", visitorEmail: "", visitorPhone: "",
-    visitorCompany: "", purpose: "", scheduledDate: "", scheduledTime: "", notes: "",
+    visitorCompany: "", purpose: "", scheduledDate: "", scheduledTime: "", notes: "", endTime: "", roomId: "",
   });
   const [formSaving, setFormSaving] = useState(false);
   const [breakForm, setBreakForm]   = useState({ startTime: "", endTime: "", reason: "" });
@@ -61,6 +61,7 @@ export function SchedulePage() {
     api.scheduling.getBlockedSlots,
     staffRecord?._id ? { staffId: staffRecord._id } : "skip"
   );
+  const rooms = useQuery(api.rooms.listActive);
 
   const approveVisit   = useMutation(api.scheduling.approve);
   const rejectVisit    = useMutation(api.scheduling.reject);
@@ -123,8 +124,9 @@ export function SchedulePage() {
         scheduledDate:  dt,
         duration: (() => { if (!form.endTime) return undefined; const e = new Date(`${form.scheduledDate}T${form.endTime}`).getTime(); return e > dt ? Math.round((e-dt)/60000) : undefined; })(),
         hostStaffId:    staffRecord?._id,
+        roomId:         (form.roomId || undefined) as any,
       });
-      setForm({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:"", scheduledTime:"", notes:"", endTime:"" });
+      setForm({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:"", scheduledTime:"", notes:"", endTime:"", roomId:"" });
       setShowForm(false);
     } finally { setFormSaving(false); }
   };
@@ -553,7 +555,6 @@ export function SchedulePage() {
             <div className="scp-modal-hd">
               <div>
                 <div className="scp-modal-title">Schedule a visit</div>
-                <div className="scp-modal-sub">Visitor details — receptionist will see this immediately</div>
               </div>
               <button className="scp-modal-close" onClick={() => setShowForm(false)}><X size={18} /></button>
             </div>
@@ -589,6 +590,18 @@ export function SchedulePage() {
                   <textarea className="scp-field-input scp-field-textarea" rows={2}
                     placeholder="Any additional details..."
                     value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
+                </div>
+                <div className="scp-field scp-field--full">
+                  <label className="scp-field-lbl">Room (optional)</label>
+                  <select className="scp-field-input" value={form.roomId}
+                    onChange={e => setForm(f => ({ ...f, roomId: e.target.value }))}>
+                    <option value="">No room selected</option>
+                    {(rooms ?? []).filter((r:any) => r.status === "active").map((r:any) => (
+                      <option key={r._id} value={r._id}>
+                        {r.name}{r.floor ? ` · ${r.floor}` : ""}{r.capacity ? ` · ${r.capacity} pax` : ""}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -646,6 +659,7 @@ export function SchedulePage() {
     </>
   );
 }
+
 
 
 

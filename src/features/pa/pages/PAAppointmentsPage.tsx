@@ -27,7 +27,7 @@ export function PAAppointmentsPage() {
   const [formSaving, setFormSaving] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<any>(null);
   const today = new Date().toISOString().split("T")[0];
-  const [form, setForm] = useState({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:today, scheduledTime:"09:00", endTime:"", notes:"", hostStaffId:"" });
+const [form, setForm] = useState({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:today, scheduledTime:"09:00", endTime:"", notes:"", hostStaffId:"", roomId:"" });
   const setF = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   const handleCreate = async () => {
@@ -36,9 +36,9 @@ export function PAAppointmentsPage() {
     try {
       const dt = new Date(`${form.scheduledDate}T${form.scheduledTime}`).getTime();
       const dur = form.endTime ? (() => { const e = new Date(`${form.scheduledDate}T${form.endTime}`).getTime(); return e > dt ? Math.round((e-dt)/60000) : undefined; })() : undefined;
-      await createVisit({ visitorName:form.visitorName, visitorEmail:form.visitorEmail||undefined, visitorPhone:form.visitorPhone||undefined, visitorCompany:form.visitorCompany||undefined, purpose:form.purpose||undefined, scheduledDate:dt, duration:dur, notes:form.notes||undefined, hostStaffId:(form.hostStaffId||undefined) as any });
+await createVisit({ visitorName:form.visitorName, visitorEmail:form.visitorEmail||undefined, visitorPhone:form.visitorPhone||undefined, visitorCompany:form.visitorCompany||undefined, purpose:form.purpose||undefined, scheduledDate:dt, duration:dur, notes:form.notes||undefined, hostStaffId:(form.hostStaffId||undefined) as any, roomId:(form.roomId||undefined) as any });
       setShowForm(false);
-      setForm({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:today, scheduledTime:"09:00", endTime:"", notes:"", hostStaffId:"" });
+      setForm({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:today, scheduledTime:"09:00", endTime:"", notes:"", hostStaffId:"", roomId:"" });
     } finally { setFormSaving(false); }
   };
 
@@ -48,6 +48,7 @@ export function PAAppointmentsPage() {
   const allStaff      = useQuery(api.staff.list);
   const createVisit   = useMutation(api.scheduling.createByPA);
   const approveVisit  = useMutation(api.scheduling.approve);
+const rooms         = useQuery(api.rooms.listActive);
   const rejectVisit   = useMutation(api.scheduling.reject);
 
   const assignedIds = new Set((assignedStaff ?? []).map((s:any) => s._id));
@@ -245,6 +246,16 @@ export function PAAppointmentsPage() {
               style={{width:"100%",padding:"9px 12px",background:"var(--bg,#0d1117)",border:"1px solid var(--border,#30363d)",borderRadius:8,fontSize:"0.875rem",fontFamily:"inherit",color:"var(--text)",outline:"none"}}>
               <option value="">Select staff member</option>
               {(assignedStaff??[]).map((s:any)=><option key={s._id} value={s._id}>{s.name}</option>)}
+            </select>
+          </div>
+          <div style={{marginBottom:16}}>
+            <label style={{display:"block",fontSize:"0.78rem",fontWeight:600,color:"var(--muted)",marginBottom:4}}>Room (optional)</label>
+            <select value={form.roomId} onChange={e=>setF("roomId",e.target.value)}
+              style={{width:"100%",padding:"9px 12px",background:"var(--bg,#0d1117)",border:"1px solid var(--border,#30363d)",borderRadius:8,fontSize:"0.875rem",fontFamily:"inherit",color:"var(--text)",outline:"none"}}>
+              <option value="">No room selected</option>
+              {(rooms??[]).filter((r:any)=>r.status==="active").map((r:any)=>(
+                <option key={r._id} value={r._id}>{r.name}{r.floor?` · ${r.floor}`:""}{r.capacity?` · ${r.capacity} pax`:""}</option>
+              ))}
             </select>
           </div>
           <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:20}}>
