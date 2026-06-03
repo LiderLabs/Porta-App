@@ -336,18 +336,18 @@ export function DashboardPage() {
                 <div style={{fontSize:"0.75rem",color:dark?"#8b949e":"#64748b",marginTop:2}}>Share this link with visitors so they can book appointments directly.</div>
               </div>
               <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-                <a href={`${window.location.origin.replace("5173","5174")}/book/${org.slug}`} target="_blank" rel="noreferrer"
+                <a href={`${(import.meta.env.VITE_BOOKING_URL ?? "https://porta-booking.vercel.app")}/book/${org.slug}`} target="_blank" rel="noreferrer"
                   style={{fontSize:"0.78rem",fontWeight:600,color:"#3fb950",textDecoration:"none",padding:"6px 12px",border:"1px solid rgba(63,185,80,0.3)",borderRadius:7,background:"rgba(63,185,80,0.08)"}}>
                   Preview ↗
                 </a>
-                <button onClick={()=>{navigator.clipboard.writeText(`${window.location.origin.replace("5173","5174")}/book/${org.slug}`);setCopied(true);setTimeout(()=>setCopied(false),2000);}}
+                <button onClick={()=>{navigator.clipboard.writeText(`${(import.meta.env.VITE_BOOKING_URL ?? "https://porta-booking.vercel.app")}/book/${org.slug}`);setCopied(true);setTimeout(()=>setCopied(false),2000);}}
                   style={{fontSize:"0.78rem",fontWeight:700,padding:"6px 14px",borderRadius:7,border:"none",background:copied?"#3fb950":"rgba(63,185,80,0.15)",color:copied?"#fff":"#3fb950",cursor:"pointer",fontFamily:"inherit",transition:"all .2s"}}>
                   {copied?"✓ Copied!":"Copy link"}
                 </button>
               </div>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8,background:dark?"#0d1117":"#f8fafc",border:`1px solid ${dark?"#30363d":"#e2e8f0"}`,borderRadius:8,padding:"9px 14px",fontFamily:"monospace",fontSize:"0.8rem",color:dark?"#8b949e":"#64748b",overflowX:"auto",whiteSpace:"nowrap"}}>
-              🔗 {window.location.origin.replace("5173","5174")}/book/{org.slug}
+              🔗 {(import.meta.env.VITE_BOOKING_URL ?? "https://porta-booking.vercel.app")}/book/{org.slug}
             </div>
           </div>
         )}
@@ -357,6 +357,7 @@ export function DashboardPage() {
 }
 
 export default DashboardPage;
+
 
 
 

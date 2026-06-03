@@ -222,41 +222,6 @@ export function BookingRulesPage() {
               </div>
             </div>
           </div>
-          {/* Meeting duration */}
-          <div className="br-card">
-            <div className="br-card-title">Meeting duration</div>
-            <div className="br-row">
-              <div><div className="br-row-label">Default duration (mins)</div><div className="br-row-sub">Used when no end time specified</div></div>
-              <input type="number" className="br-num-input" value={cfg.defaultDuration ?? 60} onChange={e => set("defaultDuration", parseInt(e.target.value)||60)} />
-            </div>
-            <div className="br-row">
-              <div><div className="br-row-label">Min duration (mins)</div><div className="br-row-sub">Shortest allowed meeting</div></div>
-              <input type="number" className="br-num-input" value={cfg.minDuration ?? 30} onChange={e => set("minDuration", parseInt(e.target.value)||30)} />
-            </div>
-            <div className="br-row">
-              <div><div className="br-row-label">Max duration (mins)</div><div className="br-row-sub">Longest allowed meeting</div></div>
-              <input type="number" className="br-num-input" value={cfg.maxDuration ?? 120} onChange={e => set("maxDuration", parseInt(e.target.value)||120)} />
-            </div>
-            <div className="br-row" style={{flexDirection:"column",alignItems:"flex-start",gap:10}}>
-              <div><div className="br-row-label">Allowed durations (booking page)</div><div className="br-row-sub">Options shown to visitors when booking</div></div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
-                {[15,30,45,60,90,120,180].map((mins:number) => {
-                  const active = (cfg.allowedDurations ?? [30,60,90,120]).includes(mins);
-                  return (
-                    <button key={mins} onClick={() => {
-                      const cur = cfg.allowedDurations ?? [30,60,90,120];
-                      set("allowedDurations", active ? cur.filter((x:number)=>x!==mins) : [...cur,mins].sort((a:number,b:number)=>a-b));
-                    }} style={{padding:"5px 14px",borderRadius:20,border:"1px solid",fontSize:".78rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit",
-                      background: active ? "var(--accent,#3fb950)" : "transparent",
-                      color:      active ? "#fff" : "var(--muted)",
-                      borderColor:active ? "var(--accent,#3fb950)" : "var(--border)"}}>
-                      {mins<60?`${mins}m`:mins===60?"1h":mins===90?"1h 30m":`${mins/60}h`}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
           {/* Allowed purposes */}
           <div className="br-card br-card--full">
             <div className="br-card-title">Allowed visit purposes</div>

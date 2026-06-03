@@ -59,21 +59,6 @@ function Toggle({ on, onChange, accent }: { on: boolean; onChange: () => void; a
   );
 }
 
-function FieldTypeTag({ type, t }: { type: string; t: any }) {
-  const labels: Record<string, string> = {
-    text: "Text", tel: "Phone", email: "Email",
-    select: "Dropdown", textarea: "Long text", checkbox: "Checkbox",
-  };
-  return (
-    <span style={{
-      fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 20,
-      border: `1px solid ${t.border}`, color: t.muted, background: t.faint,
-      textTransform: "uppercase" as const, letterSpacing: "0.06em",
-    }}>
-      {labels[type] ?? type}
-    </span>
-  );
-}
 
 export function CheckInFormPage() {
   const { dark } = useTheme();
@@ -166,7 +151,7 @@ export function CheckInFormPage() {
   const enabledFields = live.filter(f => f.enabled);
 
   if (rawSettings === undefined) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", color: t.muted, fontFamily: "'DM Sans',sans-serif" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", color: t.muted, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
       Loading...
     </div>
   );
@@ -175,7 +160,7 @@ export function CheckInFormPage() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap');
-        .cif-root{font-family:'DM Sans',sans-serif;padding:28px 32px 48px;background:${t.bg};min-height:calc(100vh - 52px);color:${t.text};}
+        .cif-root{font-family:'Plus Jakarta Sans',sans-serif;padding:28px 32px 48px;background:${t.bg};min-height:calc(100vh - 52px);color:${t.text};}
         .cif-hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;}
         .cif-title{font-size:1.55rem;font-weight:800;letter-spacing:-0.02em;color:${t.text};margin-bottom:3px;}
         .cif-sub{font-size:0.875rem;color:${t.muted};}
@@ -275,10 +260,7 @@ export function CheckInFormPage() {
                       <div className="cif-field-info">
                         <div className="cif-field-label">
                           {field.label}
-                          {!field.custom && <span className="cif-badge-system">system</span>}
-                          {field.custom  && <span className="cif-badge-custom">custom</span>}
                         </div>
-                        <div className="cif-field-sub"><FieldTypeTag type={field.type} t={t}/></div>
                       </div>
                       <button className={`cif-req-btn ${field.required ? "cif-req-btn--on" : "cif-req-btn--off"}`}
                         onClick={() => update(idx, { required: !field.required })}>
@@ -310,10 +292,7 @@ export function CheckInFormPage() {
                       <div className="cif-field-info">
                         <div className="cif-field-label">
                           {field.label}
-                          {!field.custom && <span className="cif-badge-system">system</span>}
-                          {field.custom  && <span className="cif-badge-custom">custom</span>}
                         </div>
-                        <div className="cif-field-sub"><FieldTypeTag type={field.type} t={t}/></div>
                       </div>
                       <Toggle on={false} onChange={() => update(idx, { enabled: true })} accent={t.accent}/>
                       {field.custom && (
@@ -407,3 +386,6 @@ export function CheckInFormPage() {
 
 
 export default CheckInFormPage;
+
+
+

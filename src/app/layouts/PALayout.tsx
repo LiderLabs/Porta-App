@@ -87,7 +87,6 @@ export function PALayout() {
                 <button onClick={() => setMenuOpen(false)} style={{marginLeft:"auto",background:"none",border:"none",cursor:"pointer",color:"var(--muted)",fontSize:"18px",lineHeight:1,padding:"0 4px"}}>&#x2715;</button>
               </div>
               <nav className="pal-nav">
-          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid var(--border)"}}>{orgName}</div>
                 {navItems.map(item=>(
                   <NavLink key={item.path} to={item.path} onClick={() => setMenuOpen(false)} className={({isActive})=>isActive?"pal-nav-item active":"pal-nav-item"}>
                     {item.icon}{item.label}{item.badge&&<span className="pal-badge">{item.badge}</span>}
@@ -111,7 +110,6 @@ export function PALayout() {
           <img src="/Porta.png" alt="Porta" style={{height:"26px",width:"auto"}}/>
           <span className="pal-brand-role">PA</span>
         </div>
-          <div style={{fontSize:"11px",fontWeight:600,color:"#3fb950",padding:"4px 16px 10px",letterSpacing:"0.03em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderBottom:"1px solid var(--border)"}}>{orgName}</div>
         <nav className="pal-nav">
           {navItems.map(item=>(
             <NavLink key={item.path} to={item.path} className={({isActive})=>isActive?"pal-nav-item active":"pal-nav-item"}>
@@ -136,9 +134,13 @@ export function PALayout() {
 
       </aside>
         <main className="pal-main">
-          <div className="pal-topbar">
-            <button className="pal-topbar-toggle" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")}>{theme==="dark" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}</button>
+          <div className="pal-topbar" style={{display:"flex",alignItems:"center",justifyContent:"flex-end",gap:10}}>
+            <span style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)",letterSpacing:"-0.01em",maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{orgName}</span>
+            <div style={{width:"1px",height:20,background:"var(--border)",flexShrink:0}}/>
+            <button className="pal-topbar-toggle" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} title={theme==="dark"?"Light mode":"Dark mode"}>{theme==="dark" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}</button>
           </div>
+
+
         <div className="pal-content"><Outlet/></div>
 
       <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto"}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
@@ -147,6 +149,7 @@ export function PALayout() {
   );
 }
 export default PALayout;
+
 
 
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 // @ts-ignore
 import { api } from "../../../../convex/_generated/api";
@@ -67,24 +67,24 @@ export function DepartmentsPage() {
   };
 
   const css = `
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
-    .dp-root { font-family:'DM Sans',sans-serif; padding:24px 32px 40px; background:${t.bg}; min-height:calc(100vh - 52px); color:${t.text}; transition:background 0.2s,color 0.2s; }
+    
+    .dp-root { font-family:'Plus Jakarta Sans',sans-serif; padding:24px 32px 40px; background:${t.bg}; min-height:calc(100vh - 52px); color:${t.text}; transition:background 0.2s,color 0.2s; }
     .dp-hdr { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:28px; }
     .dp-title { font-size:1.6rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:3px; color:${t.text}; }
     .dp-sub { font-size:0.875rem; color:${t.muted}; }
     .dp-btn { background:${t.accent}; color:#fff; border:none; border-radius:8px; padding:10px 20px; font-size:0.875rem; font-weight:600; cursor:pointer; font-family:inherit; transition:filter 0.15s; }
     .dp-btn:hover { filter:brightness(1.1); }
     .dp-btn:disabled { opacity:0.5; cursor:not-allowed; }
-    .dp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
-    .dp-card { background:${t.card}; border:1px solid ${t.border}; border-radius:12px; overflow:hidden; transition:box-shadow 0.15s,transform 0.15s; }
-    .dp-card:hover { box-shadow:0 4px 20px rgba(0,0,0,${dark?"0.35":"0.08"}); transform:translateY(-2px); }
-    .dp-band { height:4px; }
-    .dp-body { padding:16px; }
+    .dp-grid { display:flex; flex-direction:column; gap:0; border:1px solid ${t.border}; border-radius:12px; overflow:hidden; }
+    .dp-card { background:${t.card}; border-bottom:1px solid ${t.border}; transition:background 0.12s; }
+    .dp-card:last-child { border-bottom:none; } .dp-card:hover { background:${t.hov}; }
+    .dp-band { width:4px; border-radius:0; align-self:stretch; flex-shrink:0; }
+    .dp-body { padding:14px 16px; flex:1; min-width:0; }
     .dp-name { font-size:1rem; font-weight:700; color:${t.text}; margin-bottom:4px; }
     .dp-desc { font-size:0.8rem; color:${t.muted}; margin-bottom:10px; }
     .dp-meta { display:flex; gap:14px; flex-wrap:wrap; }
     .dp-meta-item { display:flex; align-items:center; gap:5px; font-size:0.78rem; color:${t.muted}; font-weight:500; }
-    .dp-actions { display:flex; gap:6px; padding:10px 16px; border-top:1px solid ${t.border}; background:${t.faint}; }
+    .dp-actions { display:flex; gap:6px; padding:10px 16px; flex-shrink:0; align-items:center; }
     .dp-ghost { background:none; border:1px solid ${t.border}; border-radius:6px; padding:5px 12px; font-size:0.78rem; font-weight:600; color:${t.text}; cursor:pointer; font-family:inherit; transition:background 0.12s; }
     .dp-ghost:hover { background:${t.hov}; }
     .dp-ghost-danger { color:${t.danger}; border-color:rgba(248,81,73,0.3); }
@@ -134,8 +134,8 @@ export function DepartmentsPage() {
         ) : (
           <div className="dp-grid">
             {depts.map((d: any) => (
-              <div key={d._id} className="dp-card">
-                <div className="dp-band" style={{ background: d.color || "#3fb950" }} />
+              <div key={d._id} className="dp-card" style={{display:"flex",alignItems:"stretch"}}>
+                <div className="dp-band" style={{background:d.color||"#3fb950",width:4,flexShrink:0}} />
                 <div className="dp-body">
                   <div className="dp-name">{d.name}</div>
                   {d.description && <div className="dp-desc">{d.description}</div>}
@@ -252,3 +252,5 @@ export function DepartmentsPage() {
 }
 
 export default DepartmentsPage;
+
+
