@@ -19,6 +19,8 @@ export default function SignUpPage() {
   const [code, setCode]         = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
+  const [showPw, setShowPw]     = useState(false);
+  const [showCf, setShowCf]     = useState(false);
 
   const hasTicket = Boolean(new URLSearchParams(window.location.search).get("__clerk_ticket"));
 
@@ -110,6 +112,10 @@ export default function SignUpPage() {
         .btn-primary { background: #3fb950; color: #fff; border: none; border-radius: 8px; padding: 11px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
         .btn-primary:hover:not(:disabled) { opacity: 0.88; }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pw-wrap { position: relative; }
+        .pw-wrap .field-input { width: 100%; padding-right: 42px; }
+        .pw-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #8b949e; display: flex; align-items: center; padding: 0; }
+        .pw-eye:hover { color: #e6edf3; }
       `}</style>
       <div className="su-page">
         <div className="su-card">
@@ -124,11 +130,11 @@ export default function SignUpPage() {
               <form className="su-form" onSubmit={handleSetPassword}>
                 <div className="field-group">
                   <label className="field-label">Password</label>
-                  <input type="password" className="field-input" placeholder="Min. 8 characters" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="new-password" />
+                  <div className="pw-wrap"><input type={showPw ? "text" : "password"} className="field-input" placeholder="Min. 8 characters" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="new-password" /><button type="button" className="pw-eye" onClick={() => setShowPw(p => !p)} tabIndex={-1}>{showPw ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>}</button></div>
                 </div>
                 <div className="field-group">
                   <label className="field-label">Confirm password</label>
-                  <input type="password" className="field-input" placeholder="Repeat password" value={confirm} onChange={e => setConfirm(e.target.value)} required autoComplete="new-password" />
+                  <div className="pw-wrap"><input type={showCf ? "text" : "password"} className="field-input" placeholder="Repeat password" value={confirm} onChange={e => setConfirm(e.target.value)} required autoComplete="new-password" /><button type="button" className="pw-eye" onClick={() => setShowCf(p => !p)} tabIndex={-1}>{showCf ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>}</button></div>
                 </div>
                 <button type="submit" className="btn-primary" disabled={loading}>{loading ? "Setting up..." : "Activate account"}</button>
               </form>
@@ -153,3 +159,5 @@ export default function SignUpPage() {
     </>
   );
 }
+
+

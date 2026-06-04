@@ -7,7 +7,7 @@ type Step = "credentials" | "mfa";
 const ROLE_LANDING: Record<string, string> = {
   receptionist: "/reception/appointments",
   employee: "/staff/home",
-  pa: "/staff/home",
+  pa: "/pa/home",
   dept_head: "/staff/home",
   admin: "/admin/dashboard",
   superadmin: "/admin/dashboard",
@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw] = useState(false);
   // Already signed in on page load — redirect immediately
   if (isSignedIn && user) {
     const role = (user.publicMetadata as any)?.role;
@@ -102,6 +103,10 @@ export default function LoginPage() {
         .btn-ghost { background: none; border: 1px solid #30363d; border-radius: 8px; padding: 10px; font-size: 0.85rem; font-weight: 600; color: #8b949e; cursor: pointer; font-family: inherit; }
         .btn-ghost:hover { background: #21262d; color: #e6edf3; }
         .mfa-prompt { font-size: 0.85rem; color: #8b949e; text-align: center; line-height: 1.5; }
+        .pw-wrap { position: relative; }
+        .pw-wrap .field-input { width: 100%; padding-right: 42px; }
+        .pw-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #8b949e; display: flex; align-items: center; padding: 0; }
+        .pw-eye:hover { color: #e6edf3; }
       `}</style>
       <div className="login-page">
         <div className="login-card">
@@ -116,7 +121,7 @@ export default function LoginPage() {
               </div>
               <div className="field-group">
                 <label className="field-label" htmlFor="password">Password</label>
-                <input id="password" type="password" className="field-input" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="current-password" />
+                <div className="pw-wrap"><input id="password" type={showPw ? "text" : "password"} className="field-input" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="current-password" /><button type="button" className="pw-eye" onClick={() => setShowPw(p => !p)} tabIndex={-1}>{showPw ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>}</button></div>
               </div>
               {error && <p className="field-error">{error}</p>}
               <button type="submit" className="btn-primary" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</button>
@@ -139,4 +144,7 @@ export default function LoginPage() {
     </>
   );
 }
+
+
+
 

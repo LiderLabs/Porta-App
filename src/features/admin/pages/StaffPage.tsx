@@ -8,10 +8,11 @@ import { api } from "../../../../convex/_generated/api";
 import { useTheme } from "../../../app/layouts/AdminLayout";
 import { Search, X, UserPlus, Users } from "lucide-react";
 
-const ROLES = ["receptionist", "employee", "dept_head", "pa"] as const;
+const ROLES = ["admin", "receptionist", "employee", "dept_head", "pa"] as const;
 type StaffRole = typeof ROLES[number];
 
 const ROLE_META: Record<string, { color: string; bg: string; darkBg: string; label: string }> = {
+  admin:        { color: "#3fb950", bg: "rgba(63,185,80,0.12)",   darkBg: "rgba(63,185,80,0.15)",   label: "Admin" },
   receptionist: { color: "#f59e0b", bg: "rgba(245,158,11,0.12)", darkBg: "rgba(245,158,11,0.15)", label: "Receptionist" },
   employee:     { color: "#8b949e", bg: "rgba(139,148,158,0.12)", darkBg: "rgba(139,148,158,0.15)", label: "Employee" },
   dept_head:    { color: "#38bdf8", bg: "rgba(56,189,248,0.12)", darkBg: "rgba(56,189,248,0.15)", label: "Dept Head" },
@@ -523,6 +524,8 @@ export function StaffPage() {
   );
 }
 export default StaffPage;
+
+
 
 
 
