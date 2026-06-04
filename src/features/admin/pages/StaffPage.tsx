@@ -164,7 +164,8 @@ export function StaffPage() {
     if (!form.name || !form.email) return;
     setSub(true); setError("");
     try {
-      await sendInvite({ ...form, invitedByClerkId: user?.id ?? "", invitedByName: user?.fullName ?? "Admin" });
+      const orgId = (user?.publicMetadata as any)?.orgId;
+      await sendInvite({ ...form, invitedByClerkId: user?.id ?? "", invitedByName: user?.fullName ?? "Admin", orgId });
       setShowModal(false);
       setForm({ name: "", email: "", role: "employee", department: "" });
     } catch (e: any) {
@@ -522,5 +523,6 @@ export function StaffPage() {
   );
 }
 export default StaffPage;
+
 
 
