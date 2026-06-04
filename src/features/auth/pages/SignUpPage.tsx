@@ -13,21 +13,36 @@ const ROLE_LANDING: Record<string, string> = {
 export default function SignUpPage() {
   const { signUp, isLoaded, setActive } = useSignUp();
   const { isSignedIn, user } = useUser();
-  const [step, setStep]         = useState<"password" | "verify">("password");
+  const [step, setStep]         = useState<"init" | "password" | "verify">("init");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm]   = useState("");
   const [code, setCode]         = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
-  // Already signed in — redirect
-  if (isSignedIn && user) {
-    const role = (user.publicMetadata as any)?.role;
-    window.location.replace(ROLE_LANDING[role] ?? "/");
-    return <div style={{ minHeight: "100vh", background: "#0d1117" }} />;
-  }
+  // Already signed in — redirect to correct page
+  useEffect(() => {
+    if (isSignedIn && user) {
+      const role = (user.publicMetadata as any)?.role;
+      window.location.replace(ROLE_LANDING[role] ?? "/");
+    }
+  }, [isSignedIn, user]);
 
-  if (!isLoaded) return <div style={{ minHeight: "100vh", background: "#0d1117" }} />;
+  // Pick up the Clerk __clerk_ticket from the URL and activate it
+  useEffect(() => {
+    if (!isLoaded || !signUp || step !== "init") return;
+    const ticket = new URLSearchParams(window.location.search).get("__clerk_ticket");
+    if (ticket) {
+      signUp.create({ strategy: "ticket", ticket })
+        .then(() => setStep("password"))
+        .catch((err: any) => {
+          setError(err?.errors?.[0]?.message ?? "Invalid or expired invite link.");
+          setStep("password");
+        });
+    } else {
+      setStep("password");
+    }
+  }, [isLoaded, signUp, step]);
 
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,19 +50,17 @@ export default function SignUpPage() {
     if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
     setError(""); setLoading(true);
     try {
-      await signUp!.update({ password });
-      await signUp!.attemptEmailAddressVerification({ code: "" }).catch(() => null);
-      // Try to complete — if needs verification, move to that step
-      const status = signUp!.status;
-      if (status === "complete") {
-        await setActive!({ session: signUp!.createdSessionId! });
-        window.location.replace("/");
-      } else if (status === "missing_requirements") {
+      const result = await signUp!.update({ password });
+      if (result.status === "complete") {
+        await setActive!({ session: result.createdSessionId! });
+        const role = (result as any)?.publicMetadata?.role ?? "";
+        window.location.replace(ROLE_LANDING[role] ?? "/");
+      } else if (result.status === "missing_requirements") {
         await signUp!.prepareEmailAddressVerification({ strategy: "email_code" });
         setStep("verify");
         setLoading(false);
       } else {
-        await setActive!({ session: signUp!.createdSessionId! });
+        await setActive!({ session: result.createdSessionId! });
         window.location.replace("/");
       }
     } catch (err: any) {
@@ -74,6 +87,8 @@ export default function SignUpPage() {
     }
   };
 
+  if (!isLoaded || step === "init") return <div style={{ minHeight: "100vh", background: "#0d1117" }} />;
+
   return (
     <>
       <style>{`
@@ -96,7 +111,6 @@ export default function SignUpPage() {
         .btn-primary { background: #3fb950; color: #fff; border: none; border-radius: 8px; padding: 11px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
         .btn-primary:hover:not(:disabled) { opacity: 0.88; }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .mfa-prompt { font-size: 0.85rem; color: #8b949e; text-align: center; line-height: 1.5; }
       `}</style>
       <div className="su-page">
         <div className="su-card">
@@ -107,6 +121,7 @@ export default function SignUpPage() {
             <>
               <p className="su-title">Set up your account</p>
               <p className="su-sub">Create a password to activate your invite.</p>
+              {error && <p className="field-error" style={{marginBottom:16}}>{error}</p>}
               <form className="su-form" onSubmit={handleSetPassword}>
                 <div className="field-group">
                   <label className="field-label">Password</label>
@@ -116,7 +131,6 @@ export default function SignUpPage() {
                   <label className="field-label">Confirm password</label>
                   <input type="password" className="field-input" placeholder="Repeat password" value={confirm} onChange={e => setConfirm(e.target.value)} required autoComplete="new-password" />
                 </div>
-                {error && <p className="field-error">{error}</p>}
                 <button type="submit" className="btn-primary" disabled={loading}>{loading ? "Setting up..." : "Activate account"}</button>
               </form>
             </>
@@ -140,6 +154,3 @@ export default function SignUpPage() {
     </>
   );
 }
-
-
-
