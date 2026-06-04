@@ -20,28 +20,27 @@ export default function SignUpPage() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
-  // Already signed in — redirect to correct page
+  const hasTicket = Boolean(new URLSearchParams(window.location.search).get("__clerk_ticket"));
+
+  // Already signed in with no invite ticket — go to their dashboard
   useEffect(() => {
-    if (isSignedIn && user) {
+    if (isSignedIn && user && !hasTicket) {
       const role = (user.publicMetadata as any)?.role;
       window.location.replace(ROLE_LANDING[role] ?? "/");
     }
-  }, [isSignedIn, user]);
+  }, [isSignedIn, user, hasTicket]);
 
-  // Pick up the Clerk __clerk_ticket from the URL and activate it
+  // Process the invite ticket
   useEffect(() => {
     if (!isLoaded || !signUp || step !== "init") return;
     const ticket = new URLSearchParams(window.location.search).get("__clerk_ticket");
-    if (ticket) {
-      signUp.create({ strategy: "ticket", ticket })
-        .then(() => setStep("password"))
-        .catch((err: any) => {
-          setError(err?.errors?.[0]?.message ?? "Invalid or expired invite link.");
-          setStep("password");
-        });
-    } else {
-      setStep("password");
-    }
+    if (!ticket) { setStep("password"); return; }
+    signUp.create({ strategy: "ticket", ticket })
+      .then(() => setStep("password"))
+      .catch((err: any) => {
+        setError(err?.errors?.[0]?.message ?? "Invalid or expired invite link.");
+        setStep("password");
+      });
   }, [isLoaded, signUp, step]);
 
   const handleSetPassword = async (e: React.FormEvent) => {
