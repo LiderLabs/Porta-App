@@ -22,6 +22,7 @@ import { ProfilePage } from "./features/shared/ProfilePage";
 
 import { HomePage }               from "./features/staff/pages/HomePage";
 import { SchedulePage }           from "./features/staff/pages/SchedulePage";
+import { SpacesPage }             from "./features/staff/pages/SpacesPage";
 import { MessagesPage as StaffMessagesPage } from "./features/staff/pages/MessagesPage";
 
 import { PAHomePage }             from "./features/pa/pages/PAHomePage";
@@ -131,6 +132,7 @@ function AppRoutes() {
               <Route path="/staff/home"     element={<HomePage />} />
               <Route path="/staff/schedule" element={<SchedulePage />} />
               <Route path="/staff/messages" element={<StaffMessagesPage />} />
+              <Route path="/staff/spaces"   element={<SpacesPage />} />
           <Route path="/staff/profile" element={<ProfilePage />} />
             </Route>
           </Route>
@@ -174,5 +176,6 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
 
 

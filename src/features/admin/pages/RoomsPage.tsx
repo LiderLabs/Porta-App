@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 import { useQuery, useMutation } from "convex/react";
 // @ts-ignore
 import { api } from "../../../../convex/_generated/api";
@@ -8,6 +9,8 @@ import { X, Plus, DoorOpen } from "lucide-react";
 const AMENITIES = ["Projector","Whiteboard","TV Screen","Video Conferencing","AC","Phone","Whiteboard Markers","Coffee Machine"];
 
 export function RoomsPage() {
+  const { user } = useUser();
+  const orgId = (user?.publicMetadata as any)?.orgId as string | undefined;
   const { dark } = useTheme();
   const rooms   = useQuery(api.rooms.list);
   const create  = useMutation(api.rooms.create);
@@ -43,7 +46,7 @@ export function RoomsPage() {
       if (editing) {
         await update({ roomId:editing._id, name:form.name.trim(), floor:form.floor||undefined, capacity:form.capacity?parseInt(form.capacity):undefined, amenities:form.amenities.length?form.amenities:undefined, status:form.status });
       } else {
-        await create({ name:form.name.trim(), floor:form.floor||undefined, capacity:form.capacity?parseInt(form.capacity):undefined, amenities:form.amenities.length?form.amenities:undefined });
+        await create({ name:form.name.trim(), floor:form.floor||undefined, capacity:form.capacity?parseInt(form.capacity):undefined, amenities:form.amenities.length?form.amenities:undefined, orgId });
       }
       setShowForm(false); resetForm(); setEditing(null);
     } finally { setSaving(false); }
@@ -188,3 +191,4 @@ export function RoomsPage() {
   );
 }
 export default RoomsPage;
+

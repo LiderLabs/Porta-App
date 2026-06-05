@@ -140,10 +140,11 @@ export default function LoginPage() {
           )}
         </div>
       </div>
-      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
+      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,position:"fixed",bottom:0,left:0,right:0}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
     </>
   );
 }
+
 
 
 

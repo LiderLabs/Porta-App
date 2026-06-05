@@ -56,7 +56,12 @@ export function AppLayout() {
         </svg>
       ),
     },    {
-      path: "/staff/messages",
+      path: "/staff/spaces",
+        label: "Room Availability",
+        icon: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>),
+      },
+      {
+        path: "/staff/messages",
       label: "Messages",
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -250,7 +255,7 @@ export function AppLayout() {
                   </button>
                 ))}
               </nav>
-              <div class="sidebar-footer"><div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}}><div className="user-avatar">{avatarInitial}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{displayName}</div><div style={{fontSize:".7rem",color:"var(--muted)"}}>Staff</div></div></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/staff/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Profile</button><button onClick={async()=>{await signOut();navigate("/login");}} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Sign out</button></div>)}</div></div>
+              <div className="sidebar-footer"><div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}}><div className="user-avatar">{avatarInitial}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{displayName}</div><div style={{fontSize:".7rem",color:"var(--muted)"}}>Staff</div></div></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/staff/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Profile</button><button onClick={async()=>{await signOut();navigate("/login");}} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Sign out</button></div>)}</div></div>
 
 
 
@@ -287,27 +292,7 @@ export function AppLayout() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">
-              {avatarInitial}
-            </div>
-            <div>
-              <span className="user-name">{displayName}</span>
-              <span className="user-role">Staff</span>
-            </div>
-          </div>
-
-
-
-
-
-
-
-
-
-
-
-
+          <div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}}><div className="user-avatar">{avatarInitial}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{displayName}</div><div style={{fontSize:".7rem",color:"var(--muted)"}}>Staff</div></div></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/staff/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit"}}>Profile</button><button onClick={async()=>{await signOut();navigate("/login");}} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit"}}>Sign out</button></div>)}</div>
         </div>
       </aside>
 
@@ -324,11 +309,15 @@ export function AppLayout() {
           <Outlet />
 
         </div>
-      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto"}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
+      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto",flexShrink:0}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
       </main>
     </div>
   );
 }
+
+
+
+
 
 
 

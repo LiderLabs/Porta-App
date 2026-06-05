@@ -56,7 +56,7 @@ export function AppLayout() {
         .logout-btn:hover { background:rgba(239,68,68,.08); color:#ef4444; border-color:rgba(239,68,68,.3); }
         .theme-toggle { display:flex; align-items:center; gap:7px; background:none; border:1px solid var(--border); border-radius:8px; padding:7px 12px; font-size:.78rem; font-weight:600; color:var(--muted); cursor:pointer; font-family:inherit; width:100%; }
         .theme-toggle:hover { background:var(--hov); color:var(--text); }
-        .app-main { flex:1; overflow-y:auto; min-width:0; background:var(--bg); display:flex; flex-direction:column; position:relative; isolation:isolate; }
+        .app-main { flex:1; display:flex; flex-direction:column; min-height:100vh; overflow-y:auto; min-width:0; background:var(--bg); display:flex; flex-direction:column; position:relative; isolation:isolate; }
         .app-header { display:flex; align-items:center; justify-content:space-between; padding:12px 28px; border-bottom:1px solid var(--border); background:var(--sidebar); gap:16px; }
         .header-search { display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:7px 12px; flex:1; max-width:320px; }
         .header-search-input { background:none; border:none; outline:none; font-size:.85rem; color:var(--text); font-family:inherit; width:100%; }
@@ -158,11 +158,12 @@ export function AppLayout() {
         </header>
         <div className="app-content"><Outlet /></div>
 
-      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto"}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
+      <div style={{textAlign:"center",padding:"12px 24px",fontSize:"12px",fontWeight:600,color:"#3fb950",letterSpacing:"0.04em",opacity:0.85,marginTop:"auto",flexShrink:0}}>© {new Date().getFullYear()} Porta · Powered by Lider Technologies LTD</div>
       </main>
     </div>
   );
 }
+
 
 
 
