@@ -1,6 +1,6 @@
 ﻿import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/clerk-react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 // @ts-ignore
 import { api } from "../../../convex/_generated/api";
 import { useState, useEffect } from "react";
@@ -31,7 +31,12 @@ export function AppLayout() {
     localStorage.setItem("porta-theme", theme);
   }, [theme]);
   const { hide } = useHideOverlay();
-  useEffect(() => { const t = setTimeout(hide, 50); return () => clearTimeout(t); }, []);
+  const linkClerkUser = useMutation(api.invites.linkClerkUser);
+  useEffect(() => {
+    if (user?.id && user?.primaryEmailAddress?.emailAddress) {
+      linkClerkUser({ clerkUserId: user.id, email: user.primaryEmailAddress.emailAddress }).catch(() => {});
+    }
+  }, [user?.id]);
 
   const navItems = [
     {
