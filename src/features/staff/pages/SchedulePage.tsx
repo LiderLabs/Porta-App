@@ -132,11 +132,9 @@ export function SchedulePage() {
   };
 
   const handleApprove = async (v: any) => {
-    await approveVisit({ visitId: v._id });
     if (selectedVisit?._id === v._id) setSelectedVisit({ ...selectedVisit, status: "approved" });
   };
   const handleReject = async (v: any) => {
-    await rejectVisit({ visitId: v._id });
     if (selectedVisit?._id === v._id) setSelectedVisit({ ...selectedVisit, status: "rejected" });
   };
   const handleNoShow = async (v: any) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 
@@ -113,7 +113,20 @@ export function AnalyticsPage() {
         .an-day-bar-wrap { flex:1; background:var(--hov,#2d333b); border-radius:4px; height:10px; overflow:hidden; }
         .an-day-bar { height:100%; background:var(--accent,#3fb950); border-radius:4px; }
         .an-day-count { font-size:0.78rem; font-weight:600; color:var(--text,#e6edf3); width:24px; text-align:right; flex-shrink:0; }
-      `}</style>
+      
+    @media(max-width:768px){
+      .an-root,.an-page { padding:16px 12px; }
+      .an-header { flex-direction:column; align-items:flex-start; }
+      .an-header-right { width:100%; justify-content:space-between; }
+      .an-range-btns { flex-wrap:wrap; }
+      .an-grid,.an-charts-grid { grid-template-columns:1fr!important; }
+      .an-stat-grid { grid-template-columns:repeat(2,1fr)!important; }
+      .an-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    }
+    @media(max-width:480px){
+      .an-stat-grid { grid-template-columns:1fr 1fr!important; }
+      .an-range-btns button { padding:5px 10px; font-size:0.72rem; }
+    }`}</style>
       <div className="an-page">
         <div className="an-header">
           <div>

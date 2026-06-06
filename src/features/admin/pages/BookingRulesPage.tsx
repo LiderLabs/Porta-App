@@ -252,3 +252,4 @@ export function BookingRulesPage() {
 
 export default BookingRulesPage;
 
+

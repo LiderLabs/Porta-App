@@ -25,6 +25,7 @@ export function DepartmentsPage() {
   const [editing, setEditing]       = useState<any>(null);
   const [hoursModal, setHoursModal] = useState<any>(null);
   const [submitting, setSub]        = useState(false);
+  const [viewMode, setViewMode]     = useState<"list"|"card">("list");
   const [form, setForm] = useState({ name:"", description:"", headStaffId:"", color:DEPT_COLORS[0] });
   const [hours, setHours] = useState<any>({});
 
@@ -89,6 +90,7 @@ export function DepartmentsPage() {
     .dp-ghost:hover { background:${t.hov}; }
     .dp-ghost-danger { color:${t.danger}; border-color:rgba(248,81,73,0.3); }
     .dp-ghost-danger:hover { background:rgba(248,81,73,0.08); }
+    .dp-grid-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
     .dp-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center; gap:12px; border:1px dashed ${t.border}; border-radius:12px; }
     .dp-empty-icon { font-size:2.5rem; }
     .dp-empty-title { font-size:1.1rem; font-weight:700; color:${t.text}; }
@@ -110,6 +112,18 @@ export function DepartmentsPage() {
     .dp-sec-btn:hover { background:${t.hov}; }
     .dp-hours-row { display:flex; align-items:center; gap:16px; padding:10px 0; border-bottom:1px solid ${t.border}; }
     .dp-hours-row:last-child { border-bottom:none; }
+    @media(max-width:768px){
+      .dp-root { padding:16px 12px; }
+      .dp-hdr { flex-direction:column; align-items:flex-start; gap:10px; }
+      .dp-hdr > div:last-child { width:100%; display:flex; gap:8px; justify-content:flex-end; }
+      .dp-card { flex-direction:column; }
+      .dp-actions { padding:8px 12px 12px; justify-content:flex-end; }
+      .dp-modal { max-width:100%; margin:0; border-radius:14px 14px 0 0; position:fixed; bottom:0; left:0; right:0; max-height:85vh; }
+      .dp-overlay { align-items:flex-end; padding:0; }
+    }
+    @media(max-width:480px){
+      .dp-meta { flex-direction:column; gap:4px; }
+    }
   `;
 
   return (
@@ -121,7 +135,11 @@ export function DepartmentsPage() {
             <h1 className="dp-title">Departments</h1>
             <p className="dp-sub">{depts?.length ?? 0} departments configured</p>
           </div>
-          <button className="dp-btn" onClick={openAdd}>+ Add department</button>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <button onClick={()=>setViewMode("list")} title="List view" style={{padding:"8px 10px",borderRadius:7,border:"1px solid "+(viewMode==="list"?"#3fb950":"var(--border,#30363d)"),background:viewMode==="list"?"rgba(63,185,80,.12)":"none",color:viewMode==="list"?"#3fb950":"var(--muted)",cursor:"pointer",display:"flex",alignItems:"center"}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+            <button onClick={()=>setViewMode("card")} title="Card view" style={{padding:"8px 10px",borderRadius:7,border:"1px solid "+(viewMode==="card"?"#3fb950":"var(--border,#30363d)"),background:viewMode==="card"?"rgba(63,185,80,.12)":"none",color:viewMode==="card"?"#3fb950":"var(--muted)",cursor:"pointer",display:"flex",alignItems:"center"}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+            <button className="dp-btn" onClick={openAdd}>+ Add department</button>
+          </div>
         </div>
 
         {(!depts || depts.length === 0) ? (
@@ -132,7 +150,7 @@ export function DepartmentsPage() {
             <button className="dp-btn" onClick={openAdd}>Add department</button>
           </div>
         ) : (
-          <div className="dp-grid">
+          <div className={viewMode==="card"?"dp-grid-cards":"dp-grid"}>
             {depts.map((d: any) => (
               <div key={d._id} className="dp-card" style={{display:"flex",alignItems:"stretch"}}>
                 <div className="dp-band" style={{background:d.color||"#3fb950",width:4,flexShrink:0}} />
@@ -252,5 +270,9 @@ export function DepartmentsPage() {
 }
 
 export default DepartmentsPage;
+
+
+
+
 
 

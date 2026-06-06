@@ -5,6 +5,7 @@ import { useUser } from "@clerk/clerk-react";
 import { useState, useMemo } from "react";
 import { CheckCheck, X, CalendarDays, List } from "lucide-react";
 import { LiveCalendar } from "../../shared/LiveCalendar";
+import { NotifyModal, NotifyTemplate, NotifyData } from "../../shared/NotifyModal";
 
 const STATUS_COLORS: Record<string,string> = {
   pending:"#e3b341", approved:"#58a6ff", accepted:"#58a6ff",
@@ -21,6 +22,8 @@ const STATUS_LABEL: Record<string,string> = {
 
 export function PAAppointmentsPage() {
   const { user } = useUser();
+  const myOrg = useQuery(api.orgSettings.getMyOrg);
+  const orgName = myOrg?.name ?? "our office";
   const [filter, setFilter]       = useState<string>("pending");
   const [calView, setCalView]     = useState(false);
   const [showForm, setShowForm]   = useState(false);
@@ -29,6 +32,8 @@ export function PAAppointmentsPage() {
   const today = new Date().toISOString().split("T")[0];
 const [form, setForm] = useState({ visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"", purpose:"", scheduledDate:today, scheduledTime:"09:00", endTime:"", notes:"", hostStaffId:"", roomId:"" });
   const setF = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
+  const [notifyModal, setNotifyModal] = useState<{ template: NotifyTemplate; data: NotifyData; target: "visitor"|"host"; title: string } | null>(null);
+  const [notifyHostId, setNotifyHostId] = useState<string>("");
 
   const handleCreate = async () => {
     if (!form.visitorName || !form.scheduledDate || !form.scheduledTime) return;
@@ -102,6 +107,20 @@ const rooms         = useQuery(api.rooms.listActive);
           <p style={{color:"var(--muted)",fontSize:"0.85rem",marginTop:3,margin:0}}>
             Managing {assignedStaff?.length??0} staff member{assignedStaff?.length!==1?"s":""}
           </p>
+          <div style={{marginTop:16,borderTop:"1px solid var(--border,#30363d)",paddingTop:14}}>
+            <div style={{fontSize:"0.72rem",fontWeight:600,textTransform:"uppercase",letterSpacing:".05em",color:"var(--muted)",marginBottom:8}}>Notify a host</div>
+            <select value={notifyHostId} onChange={e=>setNotifyHostId(e.target.value)}
+              style={{width:"100%",padding:"8px 12px",background:"var(--bg,#0d1117)",border:"1px solid var(--border,#30363d)",borderRadius:8,fontSize:"0.85rem",fontFamily:"inherit",color:"var(--text)",marginBottom:8}}>
+              <option value="">Select host to notify...</option>
+              {(assignedStaff??[]).map((s:any)=><option key={s._id} value={s._id}>{s.name}</option>)}
+            </select>
+            {notifyHostId&&(
+              <button onClick={()=>{const h=(assignedStaff??[]).find((s:any)=>s._id===notifyHostId);if(!h)return;setNotifyModal({template:"visitor_arrived",target:"host",title:`Notify ${h.name}`,data:{visitorName:selectedVisit.visitorName,visitorPhone:selectedVisit.visitorPhone,hostName:h.name,hostPhone:h.phone,scheduledDate:selectedVisit.scheduledDate,purpose:selectedVisit.purpose,orgName:orgName}});}}
+                style={{width:"100%",padding:"8px",borderRadius:8,border:"1px solid rgba(37,211,102,0.3)",background:"rgba(37,211,102,0.1)",color:"#25d366",fontWeight:600,fontSize:"0.82rem",cursor:"pointer",fontFamily:"inherit"}}>
+                💬 Notify {(assignedStaff??[]).find((s:any)=>s._id===notifyHostId)?.name??""} (WhatsApp / Email / In-app)
+              </button>
+            )}
+          </div>
         </div>
         <button className="pa-new-btn" onClick={()=>setShowForm(true)}>+ New Appointment</button>
       </div>
@@ -154,10 +173,10 @@ const rooms         = useQuery(api.rooms.listActive);
               </div>
               {v.status==="pending"&&(
                 <div style={{display:"flex",gap:8,flexShrink:0}} onClick={e=>e.stopPropagation()}>
-                  <button onClick={()=>approveVisit({visitId:v._id})} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 14px",borderRadius:8,border:"1px solid rgba(63,185,80,0.4)",background:"rgba(63,185,80,0.1)",color:"#3fb950",fontWeight:600,fontSize:"0.8rem",cursor:"pointer",fontFamily:"inherit"}}>
+                  <button onClick={()=>{approveVisit({visitId:v._id});setNotifyModal({template:"approved",target:"visitor",title:"Notify visitor — Approved",data:{visitorName:v.visitorName,visitorPhone:v.visitorPhone,visitorEmail:v.visitorEmail,hostName:getStaffName(v.hostId),scheduledDate:v.scheduledDate,purpose:v.purpose,orgName:orgName}})}} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 14px",borderRadius:8,border:"1px solid rgba(63,185,80,0.4)",background:"rgba(63,185,80,0.1)",color:"#3fb950",fontWeight:600,fontSize:"0.8rem",cursor:"pointer",fontFamily:"inherit"}}>
                     <CheckCheck size={14}/> Approve
                   </button>
-                  <button onClick={()=>rejectVisit({visitId:v._id})} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 14px",borderRadius:8,border:"1px solid rgba(248,81,73,0.4)",background:"rgba(248,81,73,0.1)",color:"#f85149",fontWeight:600,fontSize:"0.8rem",cursor:"pointer",fontFamily:"inherit"}}>
+                  <button onClick={()=>{rejectVisit({visitId:v._id});setNotifyModal({template:"rejected",target:"visitor",title:"Notify visitor — Rejected",data:{visitorName:v.visitorName,visitorPhone:v.visitorPhone,visitorEmail:v.visitorEmail,hostName:getStaffName(v.hostId),scheduledDate:v.scheduledDate,purpose:v.purpose,orgName:orgName}})}} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 14px",borderRadius:8,border:"1px solid rgba(248,81,73,0.4)",background:"rgba(248,81,73,0.1)",color:"#f85149",fontWeight:600,fontSize:"0.8rem",cursor:"pointer",fontFamily:"inherit"}}>
                     <X size={14}/> Reject
                   </button>
                 </div>
@@ -187,10 +206,10 @@ const rooms         = useQuery(api.rooms.listActive);
           </div>
           {selectedVisit.status==="pending"&&(
             <div className="pa-action-row">
-              <button className="pa-approve-btn" onClick={()=>{approveVisit({visitId:selectedVisit._id});setSelectedVisit(null);}}>
+              <button className="pa-approve-btn" onClick={()=>{approveVisit({visitId:selectedVisit._id});setNotifyModal({template:"approved",target:"visitor",title:"Notify visitor — Approved",data:{visitorName:selectedVisit.visitorName,visitorPhone:selectedVisit.visitorPhone,visitorEmail:selectedVisit.visitorEmail,hostName:getStaffName(selectedVisit.hostId),scheduledDate:selectedVisit.scheduledDate,purpose:selectedVisit.purpose,orgName:orgName}});setSelectedVisit(null)}}>
                 <CheckCheck size={14}/> Approve
               </button>
-              <button className="pa-reject-btn" onClick={()=>{rejectVisit({visitId:selectedVisit._id});setSelectedVisit(null);}}>
+              <button className="pa-reject-btn" onClick={()=>{rejectVisit({visitId:selectedVisit._id});setNotifyModal({template:"rejected",target:"visitor",title:"Notify visitor — Rejected",data:{visitorName:selectedVisit.visitorName,visitorPhone:selectedVisit.visitorPhone,visitorEmail:selectedVisit.visitorEmail,hostName:getStaffName(selectedVisit.hostId),scheduledDate:selectedVisit.scheduledDate,purpose:selectedVisit.purpose,orgName:orgName}});setSelectedVisit(null)}}>
                 <X size={14}/> Reject
               </button>
             </div>
@@ -216,6 +235,7 @@ const rooms         = useQuery(api.rooms.listActive);
       </div>
     )}
 
+    {notifyModal&&(<NotifyModal isOpen={true} onClose={()=>{setNotifyModal(null);setNotifyHostId("");}} template={notifyModal.template} data={notifyModal.data} target={notifyModal.target} title={notifyModal.title} />)}
     {/* New Appointment Modal */}
     {showForm&&(
       <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setShowForm(false)}>
@@ -271,4 +291,5 @@ const rooms         = useQuery(api.rooms.listActive);
   </>);
 }
 export default PAAppointmentsPage;
+
 

@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-react";
+import { NotifyModal, NotifyTemplate, NotifyData } from "../../shared/NotifyModal";
 
 // ── types ──────────────────────────────────────────────────────────────────
 type StatusFilter = "ALL" | "pending" | "approved" | "checked_in" | "in_meeting" | "completed" | "rejected" | "cancelled" | "no_show";
@@ -297,6 +298,8 @@ function RescheduleModal({ visit, onClose, onDone }: { visit: any; onClose: () =
 // ── main page ──────────────────────────────────────────────────────────────
 export function SchedulingPage() {
   const { user } = useUser();
+  const myOrg = useQuery(api.orgSettings.getMyOrg);
+  const orgName = myOrg?.name ?? "our office";
 
   // view state
   const [filter, setFilter]             = useState<StatusFilter>("ALL");
@@ -310,6 +313,7 @@ export function SchedulingPage() {
   const [showReschedule, setShowReschedule] = useState(false);
   const [actioningId, setActioningId]   = useState<string | null>(null);
   const [checkingOut, setCheckingOut]   = useState<string | null>(null);
+  const [notifyModal, setNotifyModal] = useState<{ template: NotifyTemplate; data: NotifyData; target: "visitor"|"host"; title: string } | null>(null);
 
   const [form, setForm] = useState({
     visitorName:"", visitorEmail:"", visitorPhone:"", visitorCompany:"",
@@ -396,8 +400,8 @@ export function SchedulingPage() {
     setActioningId(visit._id);
     try {
       switch (action) {
-        case "approve":    await approve({ visitId: visit._id, actorName: user?.fullName ?? "Receptionist" }); break;
-        case "reject":     await reject({ visitId: visit._id }); break;
+        case "approve":    await approve({ visitId: visit._id, actorName: user?.fullName ?? "Receptionist" }); setNotifyModal({template:"approved",target:"visitor",title:"Notify visitor — Approved",data:{visitorName:visit.visitorName,visitorPhone:visit.visitorPhone,visitorEmail:visit.visitorEmail,hostName:visit.hostName,scheduledDate:visit.scheduledDate,purpose:visit.purpose,orgName:orgName}}); break;
+        case "reject":     await reject({ visitId: visit._id }); setNotifyModal({template:"rejected",target:"visitor",title:"Notify visitor — Rejected",data:{visitorName:visit.visitorName,visitorPhone:visit.visitorPhone,visitorEmail:visit.visitorEmail,hostName:visit.hostName,scheduledDate:visit.scheduledDate,purpose:visit.purpose,orgName:orgName}}); break;
         case "check_in":   await markCheckedIn({ visitId: visit._id }); break;
         case "in_meeting": await markInMeeting({ visitId: visit._id }); break;
         case "complete":   await markCompleted({ visitId: visit._id }); break;
@@ -718,6 +722,7 @@ export function SchedulingPage() {
                                   <button className="action-btn action-btn--reschedule"
                                     onClick={() => { setSelectedVisit(v); setShowReschedule(true); }}>↻ Reschedule</button>
                                 )}
+                                {["pending","approved","accepted","checked_in","in_meeting"].includes(v.status) && (<button className="action-btn" style={{background:"rgba(37,211,102,0.1)",color:"#25d366",border:"1px solid rgba(37,211,102,0.3)"}} onClick={() => setNotifyModal({template:["approved","accepted"].includes(v.status)?"approved":v.status==="pending"?"custom":"visitor_arrived",target:"visitor",title:"Notify visitor",data:{visitorName:v.visitorName,visitorPhone:v.visitorPhone,visitorEmail:v.visitorEmail,hostName:v.hostName,scheduledDate:v.scheduledDate,purpose:v.purpose,orgName:orgName}})}>💬 Notify</button>)}
                                 <button className="action-btn action-btn--delete" onClick={() => deleteVisit({ visitId: v._id })}>Delete</button>
                               </div>
                             </td>
@@ -827,6 +832,18 @@ export function SchedulingPage() {
                     ↻ Reschedule
                   </button>
                 )}
+                {selectedVisit.hostName && ["checked_in","in_meeting"].includes(selectedVisit.status) && (
+                  <div style={{ display:"flex", gap:8, marginTop:8 }}>
+                    <button className="action-btn" style={{flex:1,background:"rgba(37,211,102,0.1)",color:"#25d366",border:"1px solid rgba(37,211,102,0.3)"}}
+                      onClick={() => setNotifyModal({template:"visitor_arrived",target:"host",title:"Notify host",data:{visitorName:selectedVisit.visitorName,visitorPhone:selectedVisit.visitorPhone,hostName:selectedVisit.hostName,hostPhone:selectedVisit.hostPhone,scheduledDate:selectedVisit.scheduledDate,purpose:selectedVisit.purpose,orgName:orgName}})}>
+                      💬 WhatsApp host
+                    </button>
+                    <button className="action-btn" style={{flex:1,background:"rgba(88,166,255,0.1)",color:"var(--blue,#58a6ff)",border:"1px solid rgba(88,166,255,0.3)"}}
+                      onClick={() => setNotifyModal({template:"visitor_arrived",target:"host",title:"Message host",data:{visitorName:selectedVisit.visitorName,visitorPhone:selectedVisit.visitorPhone,hostName:selectedVisit.hostName,hostPhone:selectedVisit.hostPhone,scheduledDate:selectedVisit.scheduledDate,purpose:selectedVisit.purpose,orgName:orgName}})}>         
+                      ✉ Message host
+                    </button>
+                  </div>
+                )}
 
                 <div className="panel-fields" style={{ marginTop:16 }}>
                   {[
@@ -875,6 +892,7 @@ export function SchedulingPage() {
       )}
 
       {/* ── reschedule modal ── */}
+      {notifyModal && (<NotifyModal isOpen={true} onClose={() => setNotifyModal(null)} template={notifyModal.template} data={notifyModal.data} target={notifyModal.target} title={notifyModal.title} onInApp={notifyModal.target==="host" && selectedVisit ? (msg) => { sendMessage({ visitId: selectedVisit._id, senderClerkId: user?.id ?? "", senderName: user?.fullName ?? "Receptionist", senderRole:"receptionist", message: msg }); setNotifyModal(null); } : undefined} />)}
       {showReschedule && selectedVisit && (
         <RescheduleModal visit={selectedVisit} onClose={() => setShowReschedule(false)} onDone={() => setShowReschedule(false)} />
       )}
@@ -960,4 +978,5 @@ export function SchedulingPage() {
     </div>
   );
 }
+
 

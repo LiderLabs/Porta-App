@@ -20,6 +20,7 @@ export function RoomsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing]   = useState<any>(null);
   const [saving, setSaving]     = useState(false);
+  const [viewMode, setViewMode]   = useState<"list"|"card">("list");
   const [form, setForm]         = useState({ name:"", floor:"", capacity:"", amenities:[] as string[], status:"active" as "active"|"inactive" });
 
   const t = dark ? {
@@ -64,6 +65,14 @@ export function RoomsPage() {
         .rm-sub { font-size:0.875rem; color:${t.muted}; }
         .rm-btn { background:${t.accent}; color:#fff; border:none; border-radius:8px; padding:10px 20px; font-size:0.875rem; font-weight:600; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px; }
         .rm-btn:hover { filter:brightness(1.1); }
+        .rm-list { display:flex; flex-direction:column; gap:0; border:1px solid ${t.border}; border-radius:12px; overflow:hidden; }
+        .rm-list-row { display:flex; align-items:center; gap:12px; padding:14px 18px; background:${t.card}; border-bottom:1px solid ${t.border}; transition:background .12s; }
+        .rm-list-row:last-child { border-bottom:none; }
+        .rm-list-row:hover { background:${t.hov}; }
+        .rm-list-name { font-size:.9rem; font-weight:700; color:${t.text}; flex:1; min-width:0; }
+        .rm-list-meta { font-size:.78rem; color:${t.muted}; display:flex; gap:12px; }
+        .rm-view-btn { padding:7px 10px; border-radius:7px; border:1px solid var(--border,#30363d); background:none; cursor:pointer; display:flex; align-items:center; color:var(--muted); transition:all .12s; }
+        .rm-view-btn--on { border-color:#3fb950; background:rgba(63,185,80,.12); color:#3fb950; }
         .rm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
         .rm-card { background:${t.card}; border:1px solid ${t.border}; border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:12px; }
         .rm-card-name { font-size:1rem; font-weight:700; color:${t.text}; display:flex; align-items:center; gap:8px; }
@@ -94,6 +103,19 @@ export function RoomsPage() {
         .rm-cancel-btn { padding:9px 18px; background:none; border:1px solid ${t.border}; border-radius:8px; font-size:0.875rem; font-weight:600; color:${t.muted}; cursor:pointer; font-family:inherit; }
         .rm-save-btn { padding:9px 20px; background:${t.accent}; color:#fff; border:none; border-radius:8px; font-size:0.875rem; font-weight:700; cursor:pointer; font-family:inherit; }
         .rm-save-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        @media(max-width:768px){
+          .rm-root { padding:16px 12px; }
+          .rm-hdr { flex-direction:column; align-items:flex-start; gap:10px; }
+          .rm-hdr > div:last-child { width:100%; display:flex; gap:8px; justify-content:flex-end; }
+          .rm-grid { grid-template-columns:1fr; }
+          .rm-modal { max-width:100%; margin:0; border-radius:14px 14px 0 0; position:fixed; bottom:0; left:0; right:0; max-height:85vh; }
+          .modal-overlay { align-items:flex-end; padding:0; }
+          .rm-list-meta { flex-wrap:wrap; gap:6px; }
+        }
+        @media(max-width:480px){
+          .rm-grid { grid-template-columns:1fr; }
+          .rm-card { padding:14px; }
+        }
       `}</style>
 
       <div className="rm-root">
@@ -102,7 +124,11 @@ export function RoomsPage() {
             <h1 className="rm-title">Rooms</h1>
             <p className="rm-sub">Manage meeting rooms and spaces in your building</p>
           </div>
-          <button className="rm-btn" onClick={openCreate}><Plus size={16}/>Add room</button>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <button className={`rm-view-btn${viewMode==="list"?" rm-view-btn--on":""}`} onClick={()=>setViewMode("list")} title="List view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+            <button className={`rm-view-btn${viewMode==="card"?" rm-view-btn--on":""}`} onClick={()=>setViewMode("card")} title="Card view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+            <button className="rm-btn" onClick={openCreate}><Plus size={16}/>Add room</button>
+          </div>
         </div>
 
         {rooms === undefined ? (
@@ -113,7 +139,7 @@ export function RoomsPage() {
             <div style={{fontWeight:600,marginBottom:6}}>No rooms yet</div>
             <div style={{fontSize:".85rem"}}>Add your first room to start managing space bookings</div>
           </div>
-        ) : (
+        ) : viewMode==="card" ? (
           <div className="rm-grid">
             {rooms.map((r: any) => (
               <div key={r._id} className="rm-card">
@@ -132,6 +158,25 @@ export function RoomsPage() {
                 <div className="rm-card-actions">
                   <button className="rm-edit-btn" onClick={() => openEdit(r)}>Edit</button>
                   <button className="rm-del-btn" onClick={() => remove({ roomId: r._id })}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rm-list">
+            {rooms.map((r: any) => (
+              <div key={r._id} className="rm-list-row">
+                <DoorOpen size={16} style={{color:t.accent,flexShrink:0}}/>
+                <div className="rm-list-name">{r.name}</div>
+                <div className="rm-list-meta">
+                  {r.floor&&<span>📍 {r.floor}</span>}
+                  {r.capacity&&<span>👥 {r.capacity}</span>}
+                  <span className={`rm-badge rm-badge--${r.status}`}>{r.status}</span>
+                  {r.amenities?.length>0&&<span>{r.amenities.slice(0,2).join(", ")}{r.amenities.length>2?` +${r.amenities.length-2}`:""}</span>}
+                </div>
+                <div style={{display:"flex",gap:6,flexShrink:0}}>
+                  <button className="rm-edit-btn" style={{flex:"none",padding:"5px 12px"}} onClick={()=>openEdit(r)}>Edit</button>
+                  <button className="rm-del-btn" style={{padding:"5px 10px"}} onClick={()=>remove({roomId:r._id})}>Delete</button>
                 </div>
               </div>
             ))}
@@ -191,4 +236,6 @@ export function RoomsPage() {
   );
 }
 export default RoomsPage;
+
+
 

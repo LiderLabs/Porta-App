@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -111,7 +111,24 @@ export function VisitorsPage() {
         .vp-panel-field { display:flex; flex-direction:column; gap:2px; }
         .vp-panel-field-label { font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b949e); }
         .vp-panel-field-value { font-size:0.85rem; color:var(--text,#e6edf3); word-break:break-word; }
-      `}</style>
+      
+    @media(max-width:768px){
+      .vp-root,.vp-page { padding:16px 12px; }
+      .vp-header { flex-direction:column; align-items:flex-start; }
+      .vp-header-actions { width:100%; justify-content:space-between; }
+      .vp-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+      .vp-filters { flex-wrap:wrap; gap:8px; }
+      .vp-search { width:100%; }
+      .vp-modal { max-width:100%; margin:0; border-radius:14px 14px 0 0; position:fixed; bottom:0; left:0; right:0; max-height:85vh; }
+      .vp-overlay { align-items:flex-end; padding:0; }
+    }
+    @media(max-width:480px){
+      .vp-stats-row { flex-wrap:wrap; }
+      .vp-table thead th:nth-child(3),
+      .vp-table thead th:nth-child(4) { display:none; }
+      .vp-table tbody td:nth-child(3),
+      .vp-table tbody td:nth-child(4) { display:none; }
+    }`}</style>
       <div className="vp">
         <div className="vp-header">
           <div>
@@ -241,3 +258,4 @@ export function VisitorsPage() {
     </>
   );
 }
+

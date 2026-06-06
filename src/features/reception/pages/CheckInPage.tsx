@@ -133,7 +133,23 @@ export function CheckInPage() {
         .ci-btn-cancel:hover { background:var(--hov,#2d333b); color:var(--text,#e6edf3); }
         .ci-btn-submit { padding:9px 20px; background:var(--accent,#3fb950); color:#fff; border:none; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer; font-family:inherit; }
         .ci-btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
-      `}</style>
+      
+    @media(max-width:768px){
+      .ci-root,.ci-page,.ci-wrap { padding:16px 12px!important; }
+      .ci-hdr,.ci-header { flex-direction:column!important; align-items:flex-start!important; gap:10px!important; }
+      .ci-table-wrap,table { overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; }
+      .ci-grid { grid-template-columns:1fr!important; }
+      .ci-filters,.ci-search-row { flex-wrap:wrap!important; gap:8px!important; }
+      .ci-modal,.ci-detail { max-width:100%!important; width:100%!important; margin:0!important; border-radius:14px 14px 0 0!important; position:fixed!important; bottom:0!important; left:0!important; right:0!important; max-height:85vh!important; }
+      .ci-overlay { align-items:flex-end!important; padding:0!important; }
+    }
+    @media(max-width:480px){
+      table thead th:nth-child(4),
+      table thead th:nth-child(5) { display:none; }
+      table tbody td:nth-child(4),
+      table tbody td:nth-child(5) { display:none; }
+    }`}
+    </style>
       <div className="ci-page">
         <div className="ci-header">
           <div>
@@ -295,3 +311,4 @@ export function CheckInPage() {
     </>
   );
 }
+

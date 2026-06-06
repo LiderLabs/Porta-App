@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 // @ts-ignore
 import { api } from "../../../../convex/_generated/api";
@@ -201,6 +201,15 @@ export function MessagesPage() {
           transition: opacity .12s;
         }
         .cm-send:disabled { opacity: .4; cursor: not-allowed; }
+        @media(max-width:768px){
+          .cm{flex-direction:column}
+          .cm-sidebar{width:100%;min-width:unset;height:auto;max-height:45vh;border-right:none;border-bottom:1px solid var(--border)}
+          .cm-chat{flex:1;min-height:300px}
+        }
+        @media(max-width:480px){
+          .cm-sidebar{max-height:38vh}
+          .cm-bubble{max-width:85%}
+        }
       `}</style>
 
       <div className="cm">
@@ -321,4 +330,5 @@ export function MessagesPage() {
     </>
   );
 }
+
 

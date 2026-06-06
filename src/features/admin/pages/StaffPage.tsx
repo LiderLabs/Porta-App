@@ -21,7 +21,7 @@ const ROLE_META: Record<string, { color: string; bg: string; darkBg: string; lab
 
 // Sub-component: PA Assignment Modal
 function PAAssignModal({ pa, allStaff, assignments, onAssign, onUnassign, onClose, t, dark }: any) {
-  const assignableStaff = allStaff.filter((s: any) => s._id !== pa._id && s.role !== "pa" && s.role !== "receptionist");
+  const assignableStaff = allStaff.filter((s: any) => s.role === "employee" || s.role === "dept_head");
   const assignedIds = new Set(assignments.map((a: any) => a._id));
 
   return (
@@ -29,7 +29,7 @@ function PAAssignModal({ pa, allStaff, assignments, onAssign, onUnassign, onClos
       <div className="sp-modal" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
         <div className="sp-modal-hd">
           <div>
-            <div className="sp-modal-title">Assign staff to PA</div>
+            <div className="sp-modal-title">Assign PA to employees</div>
             <div style={{ fontSize: "0.78rem", color: t.muted, marginTop: 2 }}>{pa.name}</div>
           </div>
           <button className="sp-modal-close" onClick={onClose}><X size={16} /></button>
@@ -124,6 +124,7 @@ export function StaffPage() {
   const [resetSending, setResetSending] = useState(false);
   const [resetDone, setResetDone]       = useState(false);
   const [resetError, setResetError]     = useState("");
+  const [waInvite, setWaInvite] = useState<{name:string;email:string;phone:string;role:string}|null>(null);
 
   // PA assignment modal
   const [paTarget, setPaTarget] = useState<any>(null);
@@ -218,7 +219,25 @@ export function StaffPage() {
     .sp-table tbody tr:last-child { border-bottom:none; }
     .sp-table tbody tr:hover { background:${t.hov}; }
     .sp-table tbody td { padding:12px 14px; color:${t.text}; vertical-align:middle; }
-    .sp-table-empty { text-align:center; color:${t.muted}; padding:32px!important; font-size:0.875rem; }
+    .sp-table-empty { text-align:center; color:${t.muted}
+    .sp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media(max-width:768px){
+      .sp-root { padding:16px 12px; }
+      .sp-hdr { flex-direction:column; align-items:flex-start; gap:10px; }
+      .sp-hdr-actions { width:100%; display:flex; gap:8px; flex-wrap:wrap; }
+      .sp-tabs { overflow-x:auto; white-space:nowrap; padding-bottom:4px; }
+      .sp-tab { padding:7px 14px; font-size:0.78rem; }
+      .sp-filters { flex-direction:column; gap:8px; }
+      .sp-search { width:100%; }
+      .sp-table thead th:nth-child(3),
+      .sp-table thead th:nth-child(4) { display:none; }
+      .sp-table tbody td:nth-child(3),
+      .sp-table tbody td:nth-child(4) { display:none; }
+    }
+    @media(max-width:480px){
+      .sp-table thead th:nth-child(2) { display:none; }
+      .sp-table tbody td:nth-child(2) { display:none; }
+    }; padding:32px!important; font-size:0.875rem; }
     .sp-chip { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; }
     .sp-role-select { padding:4px 8px; border-radius:6px; border:1px solid ${t.border}; background:${t.faint}; color:${t.text}; font-size:0.78rem; font-family:inherit; cursor:pointer; outline:none; }
     .sp-role-select:focus { border-color:${t.accent}; }
@@ -258,7 +277,7 @@ export function StaffPage() {
       <div className="sp-root">
         <div className="sp-hdr">
           <div>
-            <h1 className="sp-title">Staff & Invites</h1>
+            <h1 className="sp-title">Staff Glossary</h1>
             <p className="sp-sub">
               {staff?.length ?? 0} staff members &middot; {invites?.filter((i: any) => i.status === "pending").length ?? 0} pending invites
             </p>
@@ -399,7 +418,7 @@ export function StaffPage() {
                       <td><span className="sp-chip" style={{ color:rm?.color, background:dark?rm?.darkBg:rm?.bg }}>{rm?.label ?? i.role}</span></td>
                       <td><span className="sp-chip" style={{ color:statusColor, background:statusBg }}>{expired && i.status === "pending" ? "expired" : i.status}</span></td>
                       <td style={{ color:t.muted, fontSize:"0.8rem" }}>{new Date(i.expiresAt).toLocaleDateString()}</td>
-                      <td>{i.status === "pending" && <button className="sp-ghost-danger" onClick={() => revokeInvite({ inviteId: i._id })}>Revoke</button>}</td>
+                      <td style={{display:"flex",gap:6,alignItems:"center"}}>{i.status==="pending"&&<><button className="sp-ghost-danger" onClick={()=>revokeInvite({inviteId:i._id})}>Revoke</button><button className="sp-ghost" style={{color:"#25d366",borderColor:"rgba(37,211,102,0.3)",background:"rgba(37,211,102,0.06)"}} onClick={()=>setWaInvite({name:i.name,email:i.email,phone:"",role:i.role})}>📲 WhatsApp</button></> }</td>
                     </tr>
                   );
                 })}
@@ -422,6 +441,35 @@ export function StaffPage() {
           />
         )}
 
+        {/* WhatsApp invite modal */}
+        {waInvite&&(
+          <div className="sp-overlay" onClick={()=>setWaInvite(null)}>
+            <div className="sp-modal" onClick={e=>e.stopPropagation()}>
+              <div className="sp-modal-hd">
+                <div className="sp-modal-title">Share invite via WhatsApp</div>
+                <button className="sp-modal-close" onClick={()=>setWaInvite(null)}><X size={16}/></button>
+              </div>
+              <div className="sp-modal-body">
+                <div className="sp-modal-note">Enter the phone number to send the invite link via WhatsApp.</div>
+                <div className="sp-field">
+                  <label className="sp-label">Phone number</label>
+                  <input className="sp-input" type="tel" placeholder="0244123456" value={waInvite.phone} onChange={e=>setWaInvite(w=>w?{...w,phone:e.target.value}:null)} />
+                </div>
+              </div>
+              <div className="sp-modal-ft">
+                <button className="sp-sec-btn" onClick={()=>setWaInvite(null)}>Cancel</button>
+                <button className="sp-btn" style={{background:"#25d366"}} disabled={!waInvite.phone} onClick={()=>{
+                  let d=waInvite.phone.replace(/\D/g,"");
+                  if(d.startsWith("0"))d="233"+d.slice(1);
+                  if(d.length===9)d="233"+d;
+                  const msg=`Hello ${waInvite.name}, you have been invited to join Porta as ${waInvite.role}. Please check your email (${waInvite.email}) for your invitation link, then sign up at: https://porta-app-one.vercel.app/sign-up`;
+                  window.open(`https://wa.me/${d}?text=${encodeURIComponent(msg)}`,"_blank");
+                  setWaInvite(null);
+                }}>Open WhatsApp</button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Invite modal */}
         {showModal && (
           <div className="sp-overlay" onClick={() => setShowModal(false)}>
@@ -524,6 +572,9 @@ export function StaffPage() {
   );
 }
 export default StaffPage;
+
+
+
 
 
 

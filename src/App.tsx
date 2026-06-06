@@ -18,6 +18,7 @@ import { VisitorsPage }           from "./features/reception/pages/VisitorsPage"
 import { AnalyticsPage }          from "./features/reception/pages/AnalyticsPage";
 import { MessagesPage as ReceptionMessagesPage } from "./features/reception/pages/MessagesPage";
 import { RoomsPage } from "./features/admin/pages/RoomsPage";
+import { AdminMessagesPage } from "./features/admin/pages/AdminMessagesPage";
 import { ProfilePage } from "./features/shared/ProfilePage";
 
 import { HomePage }               from "./features/staff/pages/HomePage";
@@ -159,6 +160,7 @@ function AppRoutes() {
               <Route path="/admin/setup"         element={<SetupPage />} />
           <Route path="/admin/profile" element={<ProfilePage />} />
           <Route path="/admin/rooms" element={<RoomsPage />} />
+        <Route path="/admin/messages" element={<AdminMessagesPage />} />
             </Route>
           </Route>
         </Route>
@@ -176,6 +178,7 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
 
 
 
