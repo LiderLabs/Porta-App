@@ -28,6 +28,7 @@ export function DashboardPage() {
   const org       = useQuery(api.orgSettings.getMyOrg);
 
   const [copied, setCopied] = useState(false);
+  const [copiedKiosk, setCopiedKiosk] = useState(false);
   // Theme tokens
   const t = dark ? {
     bg:        "#0d1117",
@@ -348,6 +349,30 @@ export function DashboardPage() {
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8,background:dark?"#0d1117":"#f8fafc",border:`1px solid ${dark?"#30363d":"#e2e8f0"}`,borderRadius:8,padding:"9px 14px",fontFamily:"monospace",fontSize:"0.8rem",color:dark?"#8b949e":"#64748b",overflowX:"auto",whiteSpace:"nowrap"}}>
               🔗 {(import.meta.env.VITE_BOOKING_URL ?? "https://porta-booking.vercel.app")}/book/{org.slug}
+            </div>
+          </div>
+        )}
+        {/* Kiosk link */}
+        {org?.slug && (
+          <div style={{marginTop:12,background:dark?"#161b22":"#fff",border:`1px solid ${dark?"#30363d":"#e2e8f0"}`,borderRadius:12,padding:"18px 20px"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
+              <div>
+                <div style={{fontSize:"0.88rem",fontWeight:700,color:dark?"#e6edf3":"#0f172a"}}>Tablet kiosk link</div>
+                <div style={{fontSize:"0.75rem",color:dark?"#8b949e":"#64748b",marginTop:2}}>Load this on your reception tablet so visitors can self check-in or register a walk-in.</div>
+              </div>
+              <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+                <a href={`${(import.meta.env.VITE_BOOKING_URL ?? "https://porta-booking.vercel.app")}/kiosk/${org.slug}`} target="_blank" rel="noreferrer"
+                  style={{fontSize:"0.78rem",fontWeight:600,color:"#a78bfa",textDecoration:"none",padding:"6px 12px",border:"1px solid rgba(167,139,250,0.3)",borderRadius:7,background:"rgba(167,139,250,0.08)"}}>
+                  Preview ↗
+                </a>
+                <button onClick={()=>{navigator.clipboard.writeText(`${(import.meta.env.VITE_BOOKING_URL ?? "https://porta-booking.vercel.app")}/kiosk/${org.slug}`);setCopiedKiosk(true);setTimeout(()=>setCopiedKiosk(false),2000);}}
+                  style={{fontSize:"0.78rem",fontWeight:700,padding:"6px 14px",borderRadius:7,border:"none",background:copiedKiosk?"#a78bfa":"rgba(167,139,250,0.15)",color:copiedKiosk?"#fff":"#a78bfa",cursor:"pointer",fontFamily:"inherit",transition:"all .2s"}}>
+                  {copiedKiosk?"✓ Copied!":"Copy link"}
+                </button>
+              </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:8,background:dark?"#0d1117":"#f8fafc",border:`1px solid ${dark?"#30363d":"#e2e8f0"}`,borderRadius:8,padding:"9px 14px",fontFamily:"monospace",fontSize:"0.8rem",color:dark?"#8b949e":"#64748b",overflowX:"auto",whiteSpace:"nowrap"}}>
+              🖥️ {(import.meta.env.VITE_BOOKING_URL ?? "https://porta-booking.vercel.app")}/kiosk/{org.slug}
             </div>
           </div>
         )}
