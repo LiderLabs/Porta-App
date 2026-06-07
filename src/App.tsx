@@ -121,7 +121,7 @@ function AppRoutes() {
               <Route path="/reception/scheduling"   element={<SchedulingPage />} />
               <Route path="/reception/checkin"      element={<CheckInPage />} />
               <Route path="/reception/visitors"     element={<VisitorsPage />} />
-              <Route path="/reception/analytics"    element={<AnalyticsPage />} />
+              {/* <Route path="/reception/analytics"    element={<AnalyticsPage /> */}} />
               <Route path="/reception/messages"     element={<ReceptionMessagesPage />} />
           <Route path="/reception/profile" element={<ProfilePage />} />
             </Route>
@@ -178,6 +178,7 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
 
 
 

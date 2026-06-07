@@ -222,6 +222,26 @@ export function BookingRulesPage() {
               </div>
             </div>
           </div>
+          {/* Required visitor fields */}
+          <div className="br-card">
+            <div className="br-card-title">Required visitor fields</div>
+            <div className="br-row-sub" style={{marginBottom:12,fontSize:"0.78rem"}}>These apply to both the booking page and the kiosk walk-in form</div>
+            {[
+              { key:"emailRequired",   label:"Email required",   sub:"Visitor must provide an email address" },
+              { key:"phoneRequired",   label:"Phone required",   sub:"Visitor must provide a phone number" },
+              { key:"companyRequired", label:"Company required", sub:"Visitor must provide their company name" },
+              { key:"purposeRequired", label:"Purpose required", sub:"Visitor must select a purpose of visit" },
+            ].map(({ key, label, sub }) => (
+              <div key={key} className="br-row">
+                <div>
+                  <div className="br-row-label">{label}</div>
+                  <div className="br-row-sub">{sub}</div>
+                </div>
+                <Toggle checked={!!cfg[key]} onChange={() => set(key, !cfg[key])} accent={t.accent} />
+              </div>
+            ))}
+          </div>
+
           {/* Allowed purposes */}
           <div className="br-card br-card--full">
             <div className="br-card-title">Allowed visit purposes</div>
@@ -251,5 +271,6 @@ export function BookingRulesPage() {
 }
 
 export default BookingRulesPage;
+
 
 

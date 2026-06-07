@@ -98,6 +98,7 @@ export function StaffPage() {
   const { user } = useUser();
   const { dark } = useTheme();
   const staff        = useQuery(api.staff.list);
+  const myOrg = useQuery(api.orgSettings.getMyOrg);
   const depts        = useQuery(api.departments.list);
   const invites      = useQuery(api.invites.list);
   const allAssignments = useQuery(api.paAssignments.listAll);
@@ -166,7 +167,7 @@ export function StaffPage() {
     if (!form.name || !form.email) return;
     setSub(true); setError("");
     try {
-      const orgId = (user?.publicMetadata as any)?.orgId;
+      const orgId = (user?.publicMetadata as any)?.orgId ?? myOrg?.orgId ?? myOrg?._id;
       await sendInvite({ ...form, invitedByClerkId: user?.id ?? "", invitedByName: user?.fullName ?? "Admin", orgId });
       setShowModal(false);
       setForm({ name: "", email: "", role: "employee", department: "" });

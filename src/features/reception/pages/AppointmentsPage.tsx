@@ -428,7 +428,7 @@ export function AppointmentsPage() {
               onClick={()=>isAppt?handleAction("complete",v):handleWalkInCheckOut(v._id)}>
               {acting?"...":"\u2192 Check Out"}
             </button>
-            <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button>
+            {/* <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button> */}
           </div>
         )}
       </div>
@@ -790,7 +790,7 @@ export function AppointmentsPage() {
                                         onClick={()=>handleAction(a.action,v)}>{a.label}</button>
                                     ))}
                                     {["checked_in","in_meeting","completed"].includes(v.status)&&(
-                                      <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>🖨 Badge</button>
+                                      {/* <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>🖨 Badge</button> */}
                                     )}
                                     {["pending","approved","accepted"].includes(v.status)&&(
                                       <button className="action-btn action-btn--reschedule"
@@ -844,7 +844,7 @@ export function AppointmentsPage() {
                                       {checkingOut===v._id?"...":"Check out"}
                                     </button>
                                   )}
-                                  <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>🖨 Badge</button>
+                                  {/* <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>🖨 Badge</button> */}
                                 </div>
                               </td>
                             </tr>
@@ -883,11 +883,11 @@ export function AppointmentsPage() {
                 </div>
               )}
               {["checked_in","in_meeting","completed"].includes(selectedVisit.status)&&(
-                <button className="action-btn action-btn--badge"
+                {/* <button className="action-btn action-btn--badge"
                   style={{width:"100%",marginTop:8,justifyContent:"center"}}
                   onClick={()=>printBadge(selectedVisit)}>
                   🖨 Print visitor badge
-                </button>
+                </button> */}
               )}
               {["pending","approved","accepted"].includes(selectedVisit.status)&&(
                 <button className="action-btn action-btn--reschedule"
@@ -944,3 +944,4 @@ export function AppointmentsPage() {
     </div>
   );
 }
+
