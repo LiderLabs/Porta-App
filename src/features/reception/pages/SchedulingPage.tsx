@@ -5,14 +5,13 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-react";
 import { NotifyModal, NotifyTemplate, NotifyData } from "../../shared/NotifyModal";
+import { LiveCalendar } from "../../shared/LiveCalendar";
 
 // ── types ──────────────────────────────────────────────────────────────────
 type StatusFilter = "ALL" | "pending" | "approved" | "checked_in" | "in_meeting" | "completed" | "rejected" | "cancelled" | "no_show";
 type ViewMode = "list" | "calendar";
 type TabMode = "appointments" | "walkins";
 
-const MONTHS   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const DAYS     = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const PURPOSES = ["Meeting","Interview","Delivery","Consultation","Maintenance","Training","Site visit","Other"];
 
 // ── status helpers ─────────────────────────────────────────────────────────
@@ -56,76 +55,6 @@ function hashColor(name: string) {
 }
 
 // ── calendar ───────────────────────────────────────────────────────────────
-function LiveCalendar({ visits, blockedSlots, onSelectVisit }: {
-  visits: any[]; blockedSlots: any[]; onSelectVisit: (v: any) => void;
-}) {
-  const [cur, setCur] = React.useState(new Date());
-  const year = cur.getFullYear(), month = cur.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
-  const today = new Date();
-
-  const visitsByDay: Record<number, any[]> = {};
-  visits.forEach((v: any) => {
-    const d = new Date(v.scheduledDate);
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      const day = d.getDate();
-      visitsByDay[day] = [...(visitsByDay[day] ?? []), v];
-    }
-  });
-
-  const blockedByDay: Record<number, any[]> = {};
-  blockedSlots.forEach((b: any) => {
-    const d = new Date(b.startTime);
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      const day = d.getDate();
-      blockedByDay[day] = [...(blockedByDay[day] ?? []), b];
-    }
-  });
-
-  return (
-    <div className="calendar-card">
-      <div className="calendar-nav">
-        <button className="btn-ghost" onClick={() => setCur(new Date(year, month - 1, 1))}>‹</button>
-        <span className="calendar-month">{MONTHS[month]} {year}</span>
-        <button className="btn-ghost" onClick={() => setCur(new Date(year, month + 1, 1))}>›</button>
-      </div>
-      <div className="calendar-live-badge">● LIVE</div>
-      <div className="calendar-grid">
-        {DAYS.map(d => <div key={d} className="calendar-day-header">{d}</div>)}
-        {cells.map((day, i) => {
-          const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-          const dayVisits  = visitsByDay[day]  ?? [];
-          const dayBlocked = blockedByDay[day] ?? [];
-          return (
-            <div key={i} className={`calendar-cell${isToday ? " calendar-cell--today" : ""}`}>
-              {day && (<>
-                <span className="calendar-day-num">{day}</span>
-                <div className="calendar-events">
-                  {dayBlocked.slice(0,1).map((b: any) => (
-                    <div key={b._id} className="calendar-event calendar-event--blocked" title={b.reason ?? "Blocked"}>
-                      🔒<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>{b.staffName?.split(" ")[0] ?? "Blocked"}
-                    </div>
-                  ))}
-                  {dayBlocked.length > 1 && <div className="calendar-more">+{dayBlocked.length-1} blocked</div>}
-
-                  {dayVisits.slice(0,2).map((v: any) => (
-                    <button key={v._id} type="button" className={`calendar-event calendar-event--${v.status}`}
-                      onClick={(e) => { e.stopPropagation(); onSelectVisit(v); }} style={{ cursor:"pointer", border:"none", width:"100%", textAlign:"left", background:"inherit", pointerEvents:"auto" }}>
-                      {(v.visitorName ?? "Visitor").split(" ")[0]}
-                    </button>
-                  ))}
-                  {dayVisits.length > 2 && <div className="calendar-more">+{dayVisits.length-2} more</div>}
-                </div>
-              </>)}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 // ── reschedule modal ───────────────────────────────────────────────────────
 function RescheduleModal({ visit, onClose, onDone }: { visit: any; onClose: () => void; onDone: () => void; }) {
