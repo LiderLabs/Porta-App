@@ -18,3 +18,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   
 );
 
+
+// PWA service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((reg) => console.log('SW registered:', reg.scope))
+      .catch((err) => console.log('SW failed:', err));
+  });
+}
