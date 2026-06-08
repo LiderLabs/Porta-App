@@ -37,11 +37,11 @@ function startOfWeek(d: Date) {
   return copy;
 }
 
-export function LiveCalendar({ visits, blockedSlots=[], onSelectVisit, title }: {
-  visits: any[]; blockedSlots?: any[]; onSelectVisit: (v: any) => void; title?: string;
+export function LiveCalendar({ visits, blockedSlots=[], onSelectVisit }: {
+  visits: any[]; blockedSlots?: any[]; onSelectVisit: (v: any) => void;
 }) {
   const [cur, setCur] = useState(new Date());
-  const [view, setView] = useState<CalView>("month");
+  const [view, setView] = useState<CalView>("week");
   const today = new Date();
 
   // ── navigation ──────────────────────────────────────────────────────────────
@@ -90,10 +90,6 @@ export function LiveCalendar({ visits, blockedSlots=[], onSelectVisit, title }: 
     d.getMonth() === today.getMonth() &&
     d.getFullYear() === today.getFullYear();
 
-  const isCurDay = (d: Date) =>
-    d.getDate() === cur.getDate() &&
-    d.getMonth() === cur.getMonth() &&
-    d.getFullYear() === cur.getFullYear();
 
   // ── MONTH view ───────────────────────────────────────────────────────────────
   const MonthView = () => {
