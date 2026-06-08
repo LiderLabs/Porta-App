@@ -45,132 +45,7 @@ const TRANSITIONS: Record<string, { label: string; action: string; cls: string }
   in_meeting: [{ label:"Check out", action:"complete",   cls:"action-btn--complete" }],
 };
 
-// ── badge printer — CR80 card 85.6 × 54 mm ────────────────────────────────
-function printBadge(visit: any) {
-  const date = new Date(visit.scheduledDate ?? Date.now()).toLocaleString([], {
-    weekday:"short", month:"short", day:"numeric",
-    hour:"2-digit", minute:"2-digit",
-  });
-  const name    = visit.visitorName ?? visit.fullName ?? "Visitor";
-  const company = visit.visitorCompany ?? visit.company ?? "";
-  const host    = visit.hostName ?? "—";
-  const purpose = visit.purpose ?? "—";
 
-  const w = window.open("", "_blank", "width=500,height=340");
-  if (!w) return;
-  w.document.write(`<!DOCTYPE html>
-<html><head><title>Visitor<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</title>
-<style>
-  @page { size: 85.6mm 54mm; margin: 0; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    width: 85.6mm; height: 54mm;
-    display: flex; align-items: center; justify-content: center;
-    background: #f2f2f2;
-  }
-  .badge {
-    width: 85.6mm; height: 54mm;
-    background: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 4mm;
-    display: flex;
-    overflow: hidden;
-  }
-  /* Left stripe */
-  .badge-stripe {
-    width: 14mm; background: #1a7f37;
-    display: flex; align-items: center; justify-content: center;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    flex-shrink: 0;
-  }
-  .badge-stripe-text {
-    font-size: 7pt; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: #fff; opacity: 0.85;
-  }
-  /* Main content */
-  .badge-body {
-    flex: 1; padding: 3.5mm 4mm;
-    display: flex; flex-direction: column; justify-content: space-between;
-  }
-  .badge-top { display: flex; align-items: flex-start; gap: 3mm; }
-  .badge-avatar {
-    width: 13mm; height: 13mm; border-radius: 50%;
-    background: #1a7f37; color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16pt; font-weight: 700; flex-shrink: 0;
-  }
-  .badge-id-block { flex: 1; min-width: 0; }
-  .badge-pass-label {
-    font-size: 6pt; font-weight: 700; letter-spacing: 1.5px;
-    text-transform: uppercase; color: #888; margin-bottom: 1mm;
-  }
-  .badge-name {
-    font-size: 12pt; font-weight: 800; color: #111;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    line-height: 1.1; letter-spacing: -0.3px;
-  }
-  .badge-company {
-    font-size: 7.5pt; color: #555; margin-top: 0.5mm;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  /* Fields grid */
-  .badge-fields {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 3mm;
-    border-top: 0.3mm solid #e5e5e5; padding-top: 2mm;
-  }
-  .badge-field-label { font-size: 5.5pt; font-weight: 700; text-transform: uppercase; color: #999; letter-spacing: 0.8px; }
-  .badge-field-value { font-size: 7.5pt; font-weight: 600; color: #111; }
-  /* Footer */
-  .badge-footer {
-    display: flex; align-items: center; justify-content: space-between;
-    border-top: 0.3mm solid #e5e5e5; padding-top: 1.5mm;
-  }
-  .badge-footer-note { font-size: 5.5pt; color: #aaa; }
-  .badge-barcode {
-    height: 5mm; width: 22mm;
-    background: repeating-linear-gradient(90deg,#111 0,#111 1px,transparent 1px,transparent 3px);
-    border-radius: 0.5mm; opacity: 0.7;
-  }
-  @media print { body { background: white; } }
-</style></head><body>
-<div class="badge">
-  <div class="badge-stripe"><span class="badge-stripe-text">Visitor Pass</span></div>
-  <div class="badge-body">
-    <div class="badge-top">
-      <div class="badge-avatar">${name[0].toUpperCase()}</div>
-      <div class="badge-id-block">
-        <div class="badge-pass-label">Visitor Pass</div>
-        <div class="badge-name">${name}</div>
-        <div class="badge-company">${company}</div>
-      </div>
-    </div>
-    <div class="badge-fields">
-      <div>
-        <div class="badge-field-label">Host</div>
-        <div class="badge-field-value">${host}</div>
-      </div>
-      <div>
-        <div class="badge-field-label">Purpose</div>
-        <div class="badge-field-value">${purpose}</div>
-      </div>
-      <div>
-        <div class="badge-field-label">Date</div>
-        <div class="badge-field-value">${date}</div>
-      </div>
-    </div>
-    <div class="badge-footer">
-      <span class="badge-footer-note">Please wear this badge at all times</span>
-      <div class="badge-barcode"></div>
-    </div>
-  </div>
-</div>
-<script>window.onload=()=>{window.print();setTimeout(()=>window.close(),1200);}<\/script>
-</body></html>`);
-  w.document.close();
-}
 
 // ── color hash for walk-in avatars ─────────────────────────────────────────
 function hashColor(name: string) {
@@ -535,12 +410,7 @@ export function SchedulingPage() {
               onClick={() => isAppt ? handleAction("complete", v) : handleWalkInCheckOut(v._id)}>
               {acting ? "…" : "→ Check Out"}
             </button>
-            {(isAppt ? ["checked_in","in_meeting"].includes(v.status) : true) && (
-              {/* <button className="action-btn action-btn--badge" style={{ fontSize:12 }}
-                onClick={() => printBadge(v)}>
-                🖨<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge
-              </button> */}
-            )}
+            
           </div>
         )}
       </div>
@@ -715,9 +585,7 @@ export function SchedulingPage() {
                                   <button key={a.action} className={`action-btn ${a.cls}`}
                                     onClick={() => handleAction(a.action, v)}>{a.label}</button>
                                 ))}
-                                {["checked_in","in_meeting","completed"].includes(v.status) && (
-                                  {/* <button className="action-btn action-btn--badge" onClick={() => printBadge(v)}>🖨<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button> */}
-                                )}
+                                
                                 {["pending","approved","accepted"].includes(v.status) && (
                                   <button className="action-btn action-btn--reschedule"
                                     onClick={() => { setSelectedVisit(v); setShowReschedule(true); }}>↻ Reschedule</button>
@@ -817,13 +685,7 @@ export function SchedulingPage() {
                   </div>
                 )}
 
-                {["checked_in","in_meeting","completed"].includes(selectedVisit.status) && (
-                  {/* <button className="action-btn action-btn--badge"
-                    style={{ width:"100%", marginTop:8, justifyContent:"center" }}
-                    onClick={() => printBadge(selectedVisit)}>
-                    🖨<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print visitor badge
-                  </button> */}
-                )}
+                
 
                 {["pending","approved","accepted"].includes(selectedVisit.status) && (
                   <button className="action-btn action-btn--reschedule"
@@ -978,6 +840,9 @@ export function SchedulingPage() {
     </div>
   );
 }
+
+
+
 
 
 
