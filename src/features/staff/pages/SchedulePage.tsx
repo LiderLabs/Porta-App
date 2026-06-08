@@ -344,58 +344,13 @@ export function SchedulePage() {
 
         {/* -- Calendar view -- */}
         {view === "calendar" && (
-          <div className="cal-card">
-            <div className="cal-nav">
-              <button className="cal-nav-btn" onClick={() => setCalDate(new Date(year, month - 1, 1))}>‹</button>
-              <div className="cal-nav-mid">
-                <button className="cal-break-btn" onClick={() => setShowBreakForm(true)}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> Set a break
-                </button>
-                <span className="cal-month">{MONTHS[month]} {year}</span>
-              </div>
-              <button className="cal-nav-btn" onClick={() => setCalDate(new Date(year, month + 1, 1))}>›</button>
-            </div>
-
-            <div className="cal-grid">
-              {DAYS.map(d => <div key={d} className="cal-day-hdr">{d}</div>)}
-              {cells.map((day, i) => {
-                const today   = new Date();
-                const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-                const dayVisits  = day ? (visitsByDay[day]  ?? []) : [];
-                const dayBlocked = day ? (blockedByDay[day] ?? []) : [];
-                const visible    = dayVisits.slice(0, 3);
-                const extra      = dayVisits.length - 3;
-                return (
-                  <div key={i} className={`cal-cell${isToday ? " cal-cell--today" : ""}`}>
-                    {day && (
-                      <>
-                        <span className="cal-day-num">{day}</span>
-                        <div className="cal-events">
-                          {dayBlocked.map((b: any) => (
-                            <div key={b._id} className="cal-event cal-event--blocked" title={b.reason || "Break"}>
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> {b.reason || "Break"}
-                            </div>
-                          ))}
-                          {visible.map((v: any) => (
-                            <div key={v._id} className="cal-event"
-                              style={{ background: STATUS_COLORS[v.status] ?? "#6b7280" }}
-                              onClick={() => setSelectedVisit(v)}
-                              title={`${v.visitorName} — ${STATUS_LABELS[v.status]}`}>
-                              {v.visitorName.split(" ")[0]}
-                            </div>
-                          ))}
-                          {extra > 0 && <div className="cal-more">+{extra} more</div>}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <LiveCalendar
+            visits={visits ?? []}
+            blockedSlots={blockedSlots ?? []}
+            onSelectVisit={setSelectedVisit}
+          />
         )}
 
-        {/* -- List view -- */}
         {view === "list" && (
           <div>
             <div className="scp-tabs">
