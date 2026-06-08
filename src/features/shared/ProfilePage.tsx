@@ -8,7 +8,9 @@ export function ProfilePage() {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
-  const convexUser = useQuery(api.users.getByClerkId, clerkUser?.id ? { clerkUserId: clerkUser.id } : "skip");
+  const clerkRole = clerkUser?.publicMetadata?.role as string | undefined;
+  const isAdmin = clerkRole === "admin" || clerkRole === "superadmin";
+  const convexUser = useQuery(api.users.getByClerkId, (!isAdmin && clerkUser?.id) ? { clerkUserId: clerkUser.id } : "skip");
 
   const displayName = convexUser?.name ?? clerkUser?.fullName ?? "";
   const avatarInitial = (displayName?.[0] ?? clerkUser?.emailAddresses?.[0]?.emailAddress?.[0] ?? "?").toUpperCase();
