@@ -53,7 +53,7 @@ await createVisit({ visitorName:form.visitorName, visitorEmail:form.visitorEmail
   const allStaff      = useQuery(api.staff.list);
   const createVisit   = useMutation(api.scheduling.createByPA);
   const approveVisit  = useMutation(api.scheduling.approve);
-const rooms         = useQuery(api.rooms.listActive);
+const rooms         = useQuery(api.rooms.listActive, myStaffRecord?.orgId ? { orgId: myStaffRecord.orgId } : "skip");
   const rejectVisit   = useMutation(api.scheduling.reject);
 
   const assignedIds = new Set((assignedStaff ?? []).map((s:any) => s._id));
