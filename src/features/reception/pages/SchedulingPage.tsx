@@ -45,6 +45,8 @@ const TRANSITIONS: Record<string, { label: string; action: string; cls: string }
   in_meeting: [{ label:"Check out", action:"complete",   cls:"action-btn--complete" }],
 };
 
+
+
 // ── color hash for walk-in avatars ─────────────────────────────────────────
 function hashColor(name: string) {
   const colors = ["#3aaa45","#0087a8","#dd6b20","#7c3aed","#db2777","#059669","#d97706","#2563eb"];
@@ -196,7 +198,7 @@ export function SchedulingPage() {
 
   // ── data ──
   const visits    = useQuery(api.scheduling.list);
-  const visitors  = useQuery(api.visitors.list);
+  const visitors  = useQuery(api.visitors.list);   // walk-ins
   const staff     = useQuery(api.staff.list);
   const messages  = useQuery(api.messages.listByVisit, selectedVisit?._id && !selectedVisit?.fullName ? { visitId: selectedVisit._id } : "skip");
 
@@ -228,6 +230,7 @@ export function SchedulingPage() {
   const deleteVisit    = useMutation(api.scheduling.remove);
   const sendMessage    = useMutation(api.messages.send);
   const checkOutWalkIn = useMutation(api.visitors.checkOut);
+  
 
   // ── today buckets ──
   const now = new Date();
@@ -343,6 +346,7 @@ export function SchedulingPage() {
         border:`1px solid ${isOnsite ? "rgba(58,170,69,0.35)" : "var(--border)"}`,
         borderRadius:12, padding:"14px 18px",
       }}>
+        {/* avatar */}
         <div style={{
           minWidth:44, height:44, borderRadius:"50%",
           background: isOnsite ? "rgba(58,170,69,0.15)" : "var(--brand)",
@@ -352,6 +356,7 @@ export function SchedulingPage() {
           display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
         }}>{name[0].toUpperCase()}</div>
 
+        {/* info */}
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontWeight:600, fontSize:14, color:"var(--ink)" }}>{name}</div>
           <div style={{ fontSize:12, color:"var(--muted)", marginTop:2 }}>
@@ -361,6 +366,7 @@ export function SchedulingPage() {
           </div>
         </div>
 
+        {/* time */}
         <div style={{ textAlign:"center", minWidth:64, flexShrink:0 }}>
           <div style={{ fontSize:16, fontWeight:700, color: isLate ? "var(--red)" : isOnsite ? "var(--brand)" : "var(--ink)" }}>
             {apptTime.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
@@ -370,6 +376,7 @@ export function SchedulingPage() {
           </div>
         </div>
 
+        {/* action */}
         {isAwaiting && (
           <div style={{ display:"flex", gap:8, flexShrink:0 }}>
             {v.status === "pending" && (
@@ -403,6 +410,7 @@ export function SchedulingPage() {
               onClick={() => isAppt ? handleAction("complete", v) : handleWalkInCheckOut(v._id)}>
               {acting ? "…" : "→ Check Out"}
             </button>
+            
           </div>
         )}
       </div>
@@ -419,23 +427,23 @@ export function SchedulingPage() {
           <h1 className="page-title">Check In</h1>
           <p className="page-subtitle">
             <div className="appt-stat-bar">
-              <div className="appt-stat-pill">
-                <div className="appt-stat-icon appt-stat-icon--pending">🕐</div>
-                <div><div className="appt-stat-num">{visits?.filter((v:any) => v.status === "pending").length ?? 0}</div><div className="appt-stat-lbl">Awaiting review</div></div>
-              </div>
-              <div className="appt-stat-pill">
-                <div className="appt-stat-icon appt-stat-icon--approved"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-                <div><div className="appt-stat-num">{visits?.filter((v:any) => ["approved","accepted"].includes(v.status)).length ?? 0}</div><div className="appt-stat-lbl">Approved</div></div>
-              </div>
-              <div className="appt-stat-pill">
-                <div className="appt-stat-icon appt-stat-icon--checkin">📍</div>
-                <div><div className="appt-stat-num">{visits?.filter((v:any) => ["checked_in","in_meeting"].includes(v.status)).length ?? 0}</div><div className="appt-stat-lbl">On premises</div></div>
-              </div>
-              <div className="appt-stat-pill">
-                <div className="appt-stat-icon appt-stat-icon--total">📋</div>
-                <div><div className="appt-stat-num">{visits?.length ?? 0}</div><div className="appt-stat-lbl">Total</div></div>
-              </div>
-            </div>
+  <div className="appt-stat-pill">
+    <div className="appt-stat-icon appt-stat-icon--pending">🕐</div>
+    <div><div className="appt-stat-num">{visits?.filter((v:any) => v.status === "pending").length ?? 0}</div><div className="appt-stat-lbl">Awaiting review</div></div>
+  </div>
+  <div className="appt-stat-pill">
+    <div className="appt-stat-icon appt-stat-icon--approved"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div><div className="appt-stat-num">{visits?.filter((v:any) => ["approved","accepted"].includes(v.status)).length ?? 0}</div><div className="appt-stat-lbl">Approved</div></div>
+  </div>
+  <div className="appt-stat-pill">
+    <div className="appt-stat-icon appt-stat-icon--checkin">📍</div>
+    <div><div className="appt-stat-num">{visits?.filter((v:any) => ["checked_in","in_meeting"].includes(v.status)).length ?? 0}</div><div className="appt-stat-lbl">On premises</div></div>
+  </div>
+  <div className="appt-stat-pill">
+    <div className="appt-stat-icon appt-stat-icon--total">📋</div>
+    <div><div className="appt-stat-num">{visits?.length ?? 0}</div><div className="appt-stat-lbl">Total</div></div>
+  </div>
+</div>
             {todayAppts.filter((v:any) => ["pending","approved","accepted"].includes(v.status)).length} awaiting ·{" "}
             {todayAppts.filter((v:any) => ["checked_in","in_meeting"].includes(v.status)).length + todayWalkInsIn.length} on premises
             {liveCalendar && <span className="live-indicator"> ● live</span>}
@@ -460,6 +468,8 @@ export function SchedulingPage() {
       {/* ── today banner ── */}
       {(todayAppts.length > 0 || todayWalkInsIn.length > 0) && (
         <div style={{ marginBottom:20 }}>
+
+          {/* awaiting */}
           {todayAppts.filter((v:any) => ["pending","approved","accepted"].includes(v.status)).length > 0 && (
             <div style={{ marginBottom:12 }}>
               <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"var(--muted)", marginBottom:8 }}>
@@ -473,6 +483,7 @@ export function SchedulingPage() {
             </div>
           )}
 
+          {/* on premises */}
           {(todayAppts.filter((v:any) => ["checked_in","in_meeting"].includes(v.status)).length > 0 || todayWalkInsIn.length > 0) && (
             <div>
               <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"var(--muted)", marginBottom:8 }}>
@@ -574,16 +585,12 @@ export function SchedulingPage() {
                                   <button key={a.action} className={`action-btn ${a.cls}`}
                                     onClick={() => handleAction(a.action, v)}>{a.label}</button>
                                 ))}
+                                
                                 {["pending","approved","accepted"].includes(v.status) && (
                                   <button className="action-btn action-btn--reschedule"
                                     onClick={() => { setSelectedVisit(v); setShowReschedule(true); }}>↻ Reschedule</button>
                                 )}
-                                {["pending","approved","accepted","checked_in","in_meeting"].includes(v.status) && (
-                                  <button className="action-btn" style={{background:"rgba(37,211,102,0.1)",color:"#25d366",border:"1px solid rgba(37,211,102,0.3)"}}
-                                    onClick={() => setNotifyModal({template:["approved","accepted"].includes(v.status)?"approved":v.status==="pending"?"custom":"visitor_arrived",target:"visitor",title:"Notify visitor",data:{visitorName:v.visitorName,visitorPhone:v.visitorPhone,visitorEmail:v.visitorEmail,hostName:v.hostName,scheduledDate:v.scheduledDate,purpose:v.purpose,orgName:orgName}})}>
-                                    💬 Notify
-                                  </button>
-                                )}
+                                {["pending","approved","accepted","checked_in","in_meeting"].includes(v.status) && (<button className="action-btn" style={{background:"rgba(37,211,102,0.1)",color:"#25d366",border:"1px solid rgba(37,211,102,0.3)"}} onClick={() => setNotifyModal({template:["approved","accepted"].includes(v.status)?"approved":v.status==="pending"?"custom":"visitor_arrived",target:"visitor",title:"Notify visitor",data:{visitorName:v.visitorName,visitorPhone:v.visitorPhone,visitorEmail:v.visitorEmail,hostName:v.hostName,scheduledDate:v.scheduledDate,purpose:v.purpose,orgName:orgName}})}>💬 Notify</button>)}
                                 <button className="action-btn action-btn--delete" onClick={() => deleteVisit({ visitId: v._id })}>Delete</button>
                               </div>
                             </td>
@@ -642,6 +649,7 @@ export function SchedulingPage() {
                                   {checkingOut === v._id ? "…" : "Check out"}
                                 </button>
                               )}
+                              {/* <button className="action-btn action-btn--badge" onClick={() => printBadge(v)}>🖨<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button> */}
                             </div>
                           </td>
                         </tr>
@@ -653,8 +661,8 @@ export function SchedulingPage() {
             )}
           </div>
 
-          {/* ── detail panel ── */}
-          {selectedVisit && (
+          {/* ── detail panel (appointments only) ── */}
+      {selectedVisit && (
             <div className="visitor-detail-panel">
               <div className="panel-header">
                 <h3 className="panel-title">Visit details</h3>
@@ -677,6 +685,8 @@ export function SchedulingPage() {
                   </div>
                 )}
 
+                
+
                 {["pending","approved","accepted"].includes(selectedVisit.status) && (
                   <button className="action-btn action-btn--reschedule"
                     style={{ width:"100%", marginTop:8, justifyContent:"center" }}
@@ -691,7 +701,7 @@ export function SchedulingPage() {
                       💬 WhatsApp host
                     </button>
                     <button className="action-btn" style={{flex:1,background:"rgba(88,166,255,0.1)",color:"var(--blue,#58a6ff)",border:"1px solid rgba(88,166,255,0.3)"}}
-                      onClick={() => setNotifyModal({template:"visitor_arrived",target:"host",title:"Message host",data:{visitorName:selectedVisit.visitorName,visitorPhone:selectedVisit.visitorPhone,hostName:selectedVisit.hostName,hostPhone:selectedVisit.hostPhone,scheduledDate:selectedVisit.scheduledDate,purpose:selectedVisit.purpose,orgName:orgName}})}>
+                      onClick={() => setNotifyModal({template:"visitor_arrived",target:"host",title:"Message host",data:{visitorName:selectedVisit.visitorName,visitorPhone:selectedVisit.visitorPhone,hostName:selectedVisit.hostName,hostPhone:selectedVisit.hostPhone,scheduledDate:selectedVisit.scheduledDate,purpose:selectedVisit.purpose,orgName:orgName}})}>         
                       ✉ Message host
                     </button>
                   </div>
@@ -743,20 +753,8 @@ export function SchedulingPage() {
         </div>
       )}
 
-      {/* ── modals ── */}
-      {notifyModal && (
-        <NotifyModal
-          isOpen={true}
-          onClose={() => setNotifyModal(null)}
-          template={notifyModal.template}
-          data={notifyModal.data}
-          target={notifyModal.target}
-          title={notifyModal.title}
-          onInApp={notifyModal.target==="host" && selectedVisit
-            ? (msg) => { sendMessage({ visitId: selectedVisit._id, senderClerkId: user?.id ?? "", senderName: user?.fullName ?? "Receptionist", senderRole:"receptionist", message: msg }); setNotifyModal(null); }
-            : undefined}
-        />
-      )}
+      {/* ── reschedule modal ── */}
+      {notifyModal && (<NotifyModal isOpen={true} onClose={() => setNotifyModal(null)} template={notifyModal.template} data={notifyModal.data} target={notifyModal.target} title={notifyModal.title} onInApp={notifyModal.target==="host" && selectedVisit ? (msg) => { sendMessage({ visitId: selectedVisit._id, senderClerkId: user?.id ?? "", senderName: user?.fullName ?? "Receptionist", senderRole:"receptionist", message: msg }); setNotifyModal(null); } : undefined} />)}
       {showReschedule && selectedVisit && (
         <RescheduleModal visit={selectedVisit} onClose={() => setShowReschedule(false)} onDone={() => setShowReschedule(false)} />
       )}
@@ -842,3 +840,9 @@ export function SchedulingPage() {
     </div>
   );
 }
+
+
+
+
+
+

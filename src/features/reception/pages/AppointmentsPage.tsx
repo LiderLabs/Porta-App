@@ -1,5 +1,4 @@
-﻿
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import * as React from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -41,6 +40,8 @@ const TRANSITIONS: Record<string,{label:string;action:string;cls:string}[]> = {
                {label:"Check out", action:"complete",   cls:"action-btn--complete"}],
   in_meeting: [{label:"Check out", action:"complete",   cls:"action-btn--complete"}],
 };
+
+
 
 function hashColor(name: string) {
   const colors = ["#3aaa45","#0087a8","#dd6b20","#7c3aed","#db2777","#059669","#d97706","#2563eb"];
@@ -100,10 +101,15 @@ function LiveCalendar({ visits, blockedSlots, onSelectVisit }: {
                   ))}
                   {dayBlocked.length>1&&<div className="calendar-more">+{dayBlocked.length-1} blocked</div>}
                   {dayVisits.slice(0,2).map((v:any)=>(
-                    <div key={v._id} className={`calendar-event calendar-event--${v.status}`} onClick={()=>onSelectVisit(v)} style={{cursor:"pointer"}}>
-                      {v.visitorName.split(" ")[0]}
-                    </div>
-                  ))}
+  <div
+    key={v._id}
+    className={`calendar-event calendar-event--${v.status}`}
+    onClick={()=>onSelectVisit(v)}
+    style={{cursor:"pointer"}}
+  >
+    {v.visitorName.split(" ")[0]}
+  </div>
+))}
                   {dayVisits.length>2&&<div className="calendar-more">+{dayVisits.length-2} more</div>}
                 </div>
               </>)}
@@ -299,10 +305,10 @@ export function AppointmentsPage() {
     setMessage("");
   };
 
-  const TAB_NAV: {id:PageTab;label:string;desc:string;badge?:number}[] = [
+  const TAB_NAV: {id:PageTab;label:string;desc:string}[] = [
     {id:"checkin",  label:"Check In",  desc:"Today's arrivals"},
     {id:"new",      label:"New Appointment", desc:"Book an appointment"},
-    {id:"schedule", label:"Schedule",  desc:"All appointments", badge:(visits??[]).filter((v:any)=>v.status==="pending").length},
+    {id:"schedule", label:"Schedule",  desc:"All appointments"},
   ];
 
   const CheckInRow = ({v, isAppt}:{v:any;isAppt:boolean}) => {
@@ -366,6 +372,7 @@ export function AppointmentsPage() {
               onClick={()=>isAppt?handleAction("complete",v):handleWalkInCheckOut(v._id)}>
               {acting?"...":"\u2192 Check Out"}
             </button>
+            {/* <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>\U0001f5a8<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:"4px"}}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Badge</button> */}
           </div>
         )}
       </div>
@@ -419,6 +426,8 @@ export function AppointmentsPage() {
         .action-btn--complete:hover:not(:disabled) { background:rgba(88,166,255,0.2); }
         .action-btn--delete   { background:rgba(248,81,73,0.08);  color:#f85149; border-color:rgba(248,81,73,0.2); }
         .action-btn--delete:hover:not(:disabled)   { background:rgba(248,81,73,0.18); }
+        .action-btn--badge    { background:var(--hov,#2d333b); color:var(--text,#e6edf3); }
+        .action-btn--badge:hover:not(:disabled)    { background:var(--surface,#21262d); }
         .action-btn--reschedule { color:var(--muted,#8b949e); }
         .action-btn--reschedule:hover { background:var(--hov,#2d333b); color:var(--text,#e6edf3); }
         .filter-tabs { display:flex; gap:4px; flex-wrap:wrap; }
@@ -453,6 +462,7 @@ export function AppointmentsPage() {
         .btn-ghost { background:none; border:1px solid var(--border,#30363d); border-radius:6px; padding:5px 10px; font-size:14px; color:var(--muted,#8b949e); cursor:pointer; font-family:inherit; }
         .btn-ghost:hover { background:var(--hov,#2d333b); color:var(--text,#e6edf3); }
         .conflict-banner { background:rgba(227,179,65,0.1); border:1px solid rgba(227,179,65,0.3); border-radius:8px; padding:10px 14px; font-size:0.82rem; color:#e3b341; }
+        /* Detail panel */
         .visitor-detail-panel { width:280px; flex-shrink:0; background:var(--surface,#161b22); border:1px solid var(--border,#30363d); border-radius:12px; display:flex; flex-direction:column; max-height:calc(100vh - 180px); overflow-y:auto; }
         .panel-header { display:flex; align-items:center; justify-content:space-between; padding:16px 18px 12px; border-bottom:1px solid var(--border,#30363d); }
         .panel-title { font-size:0.9rem; font-weight:700; color:var(--text,#e6edf3); }
@@ -463,6 +473,7 @@ export function AppointmentsPage() {
         .panel-field { display:flex; flex-direction:column; gap:2px; }
         .panel-field-label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b949e); }
         .panel-field-value { font-size:0.82rem; color:var(--text,#e6edf3); word-break:break-word; }
+        /* Messages */
         .message-thread { border-top:1px solid var(--border,#30363d); padding-top:12px; margin-top:4px; }
         .message-thread-title { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b949e); margin-bottom:8px; }
         .message-list { display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto; margin-bottom:8px; }
@@ -474,6 +485,7 @@ export function AppointmentsPage() {
         .message-time { font-size:0.65rem; opacity:0.6; margin-top:3px; align-self:flex-end; }
         .message-input-row { display:flex; gap:6px; }
         .btn-primary--sm { padding:6px 12px; font-size:0.8rem; }
+        /* Calendar */
         .calendar-card { background:var(--surface,#161b22); border:1px solid var(--border,#30363d); border-radius:12px; padding:20px; position:relative; }
         .calendar-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
         .calendar-month { font-weight:700; font-size:0.95rem; color:var(--text,#e6edf3); }
@@ -494,6 +506,7 @@ export function AppointmentsPage() {
         .calendar-event--in_meeting { background:rgba(63,185,80,0.2); color:#3fb950; }
         .calendar-event--completed  { background:rgba(139,148,158,0.12); color:#8b949e; }
         .calendar-more { font-size:0.62rem; color:var(--muted,#8b949e); padding:0 4px; }
+        /* card used in check-in tab */
         .card { background:var(--surface,#161b22); }
       `}</style>
 
@@ -518,123 +531,52 @@ export function AppointmentsPage() {
               marginBottom:-1, transition:"color .15s", fontFamily:"inherit",
             }}>
             {t.label}
-            {(t.badge??0)>0&&<span style={{marginLeft:5,background:"#e3b341",color:"#000",fontSize:10,fontWeight:700,padding:"1px 5px",borderRadius:20,minWidth:16,textAlign:"center",display:"inline-block",lineHeight:"16px"}}>{t.badge}</span>}
           </button>
         ))}
       </div>
 
       {pageTab==="checkin"&&(
-        <div style={{display:"flex",flexDirection:"column",gap:36}}>
-
-          {/* TODAY CHECK IN */}
-          <div>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:12}}>Today &mdash; Check In</div>
-            {todayAppts.length===0&&todayWalkInsIn.length===0?(
-              <div className="card-empty" style={{padding:32,textAlign:"center",background:"var(--surface,#161b22)",border:"1px solid var(--border,#30363d)",borderRadius:12}}>
-                <div style={{fontSize:28,marginBottom:8}}>&#x1F44B;</div>
-                <div style={{fontWeight:600,color:"var(--text,#e6edf3)"}}>No visitors today yet</div>
-                <div style={{color:"var(--muted,#8b949e)",fontSize:13,marginTop:4}}>Scheduled appointments will appear here when they arrive.</div>
-              </div>
-            ):(
-              <div style={{display:"flex",flexDirection:"column",gap:20}}>
-                {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length>0&&(
-                  <div>
-                    <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>Awaiting arrival &mdash; {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length}</div>
-                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                      {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).map((v:any)=>(
-                        <CheckInRow key={v._id} v={v} isAppt={true}/>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {(todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length>0||todayWalkInsIn.length>0)&&(
-                  <div>
-                    <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>On premises &mdash; {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length+todayWalkInsIn.length}</div>
-                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                      {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).map((v:any)=>(
-                        <CheckInRow key={v._id} v={v} isAppt={true}/>
-                      ))}
-                      {todayWalkInsIn.map((v:any)=>(
-                        <CheckInRow key={v._id} v={v} isAppt={false}/>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* ALL APPOINTMENTS */}
-          <div>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:12}}>All Appointments</div>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,flexWrap:"wrap"}}>
-              <div className="filter-tabs">
-                {FILTER_OPTIONS.map(f=>(
-                  <button key={f} className={`filter-tab${filter===f?" filter-tab--active":""}`} onClick={()=>setFilter(f)}>
-                    {f==="ALL"?"All":STATUS_LABEL[f]??f}
-                  </button>
-                ))}
-              </div>
-              <div className="header-search" style={{width:220,marginLeft:"auto"}}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input className="header-search-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
-              </div>
+        <div>
+          {todayAppts.length===0&&todayWalkInsIn.length===0?(
+            <div className="card-empty" style={{padding:40,textAlign:"center"}}>
+              <div style={{fontSize:32,marginBottom:8}}>&#x1F44B;</div>
+              <div style={{fontWeight:600,color:"var(--text,#e6edf3)"}}>No visitors today yet</div>
+              <div style={{color:"var(--muted,#8b949e)",fontSize:13,marginTop:4}}>Scheduled appointments will appear here when they arrive.</div>
             </div>
-            <div className="table-card">
-              {visits===undefined?(<div className="card-empty">Loading...</div>)
-              :filteredAppts.length===0?(<div className="card-empty">No appointments found.</div>):(
-                <table className="visitors-table">
-                  <thead><tr>
-                    <th>Visitor</th><th>Purpose</th><th>Scheduled</th><th>Host</th><th>Status</th><th>Actions</th>
-                  </tr></thead>
-                  <tbody>
-                    {filteredAppts.map((v:any)=>{
-                      const actions = TRANSITIONS[v.status]??[];
-                      return (
-                        <tr key={v._id} onClick={()=>setSelectedVisit(v)} style={{cursor:"pointer"}} className={selectedVisit?._id===v._id?"row--selected":""}>
-                          <td>
-                            <div className="table-name-cell">
-                              <div className="visitor-avatar visitor-avatar--scheduled visitor-avatar--sm">{v.visitorName[0].toUpperCase()}</div>
-                              <div>
-                                <div className="table-name">{v.visitorName}</div>
-                                {v.visitorEmail&&<div className="table-sub">{v.visitorEmail}</div>}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="table-muted">{v.purpose??"\u2014"}</td>
-                          <td className="table-muted">{new Date(v.scheduledDate).toLocaleDateString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</td>
-                          <td className="table-muted">{v.hostName??"\u2014"}</td>
-                          <td><span className={`badge ${STATUS_COLOR[v.status]??""}`}>{STATUS_LABEL[v.status]??v.status}</span></td>
-                          <td onClick={e=>e.stopPropagation()}>
-                            <div className="row-actions">
-                              {actions.map(a=>(<button key={a.action} className={`action-btn ${a.cls}`} onClick={()=>handleAction(a.action,v)}>{a.label}</button>))}
-                              {["pending","approved","accepted"].includes(v.status)&&(
-                                <button className="action-btn action-btn--reschedule" onClick={()=>{setSelectedVisit(v);setShowReschedule(true);}}>↻ Reschedule</button>
-                              )}
-                              <button className="action-btn action-btn--delete" onClick={()=>deleteVisit({visitId:v._id})}>Delete</button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+          ):(
+            <div style={{display:"flex",flexDirection:"column",gap:20}}>
+              {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length>0&&(
+                <div>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>
+                    Awaiting arrival &mdash; {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length}
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).map((v:any)=>(
+                      <CheckInRow key={v._id} v={v} isAppt={true}/>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length>0||todayWalkInsIn.length>0)&&(
+                <div>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>
+                    On premises &mdash; {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length+todayWalkInsIn.length}
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).map((v:any)=>(
+                      <CheckInRow key={v._id} v={v} isAppt={true}/>
+                    ))}
+                    {todayWalkInsIn.map((v:any)=>(
+                      <CheckInRow key={v._id} v={v} isAppt={false}/>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
-          </div>
-
-          {/* SCHEDULE CALENDAR */}
-          <div>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:12}}>Schedule Calendar</div>
-            <LiveCalendar
-              visits={liveCalendar?.visits??(visits??[])}
-              blockedSlots={liveCalendar?.blockedSlots??[]}
-              onSelectVisit={setSelectedVisit}
-            />
-          </div>
-
+          )}
         </div>
       )}
+
       {pageTab==="new"&&(
         <div style={{maxWidth:640}}>
           <div className="table-card" style={{padding:28}}>
@@ -714,12 +656,13 @@ export function AppointmentsPage() {
         </div>
       )}
 
+      
       {pageTab==="schedule"&&(
         <div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,flexWrap:"wrap"}}>
             <div className="filter-tabs">
               <button className={`filter-tab${listTab==="appointments"?" filter-tab--active":""}`} onClick={()=>setListTab("appointments")}>
-                Appointments <span style={{fontSize:11,marginLeft:4,opacity:.7}}>{visits?.length??0}</span>{(visits??[]).filter((v:any)=>v.status==="pending").length>0&&<span style={{marginLeft:5,background:"#e3b341",color:"#000",fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:20,minWidth:16,textAlign:"center",display:"inline-block"}}>{(visits??[]).filter((v:any)=>v.status==="pending").length}</span>}
+                Appointments <span style={{fontSize:11,marginLeft:4,opacity:.7}}>{visits?.length??0}</span>
               </button>
               <button className={`filter-tab${listTab==="walkins"?" filter-tab--active":""}`} onClick={()=>setListTab("walkins")}>
                 Walk-ins <span style={{fontSize:11,marginLeft:4,opacity:.7}}>{visitors?.length??0}</span>
@@ -790,6 +733,7 @@ export function AppointmentsPage() {
                                       <button key={a.action} className={`action-btn ${a.cls}`}
                                         onClick={()=>handleAction(a.action,v)}>{a.label}</button>
                                     ))}
+                                    
                                     {["pending","approved","accepted"].includes(v.status)&&(
                                       <button className="action-btn action-btn--reschedule"
                                         onClick={()=>{setSelectedVisit(v);setShowReschedule(true);}}>↻ Reschedule</button>
@@ -842,6 +786,7 @@ export function AppointmentsPage() {
                                       {checkingOut===v._id?"...":"Check out"}
                                     </button>
                                   )}
+                                  {/* <button className="action-btn action-btn--badge" onClick={()=>printBadge(v)}>🖨 Badge</button> */}
                                 </div>
                               </td>
                             </tr>
@@ -879,6 +824,7 @@ export function AppointmentsPage() {
                   ))}
                 </div>
               )}
+              
               {["pending","approved","accepted"].includes(selectedVisit.status)&&(
                 <button className="action-btn action-btn--reschedule"
                   style={{width:"100%",marginTop:8,justifyContent:"center"}}
@@ -934,7 +880,6 @@ export function AppointmentsPage() {
     </div>
   );
 }
-
 
 
 
