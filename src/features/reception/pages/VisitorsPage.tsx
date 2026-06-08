@@ -32,10 +32,18 @@ export function VisitorsPage() {
   const navigate  = useNavigate();
   const visitors  = useQuery(api.visitors.list);
   const checkOut  = useMutation(api.visitors.checkOut);
+  const scheduledVisits = useQuery(api.scheduling.list);
 
   const effectiveSearch = search || (params.get("search") ?? "");
-
-  const filtered = visitors?.filter((v: any) => {
+  const scheduledAsVisitors = (scheduledVisits ?? []).map((v: any) => ({
+    _id: v._id, fullName: v.visitorName ?? v.fullName ?? "",
+    company: v.company ?? "", phone: v.phone ?? "", email: v.email ?? "",
+    purpose: v.purpose ?? "", checkInTime: v.scheduledDate,
+    status: (v.status === "checked_in" || v.status === "in_meeting") ? "IN" : v.status === "completed" ? "OUT" : v.status,
+    _source: "scheduled", hostName: v.hostName ?? "",
+  }));
+  const allVisitors = [...(visitors ?? []).map((v:any)=>({...v,_source:"walkin"})), ...scheduledAsVisitors];
+  const filtered = allVisitors.filter((v: any) => {
     const okFilter = filter === "ALL" || v.status === filter;
     const okSearch = !effectiveSearch ||
       v.fullName.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
@@ -43,14 +51,12 @@ export function VisitorsPage() {
       (v.purpose??"").toLowerCase().includes(effectiveSearch.toLowerCase());
     return okFilter && okSearch;
   });
-
   const handleCheckOut = async (id: string) => {
     setCheckingOut(id);
     try { await checkOut({ visitorId: id as any }); } finally { setCheckingOut(null); }
   };
-
-  const inCount  = visitors?.filter((v:any)=>v.status==="IN").length ?? 0;
-  const outCount = visitors?.filter((v:any)=>v.status==="OUT").length ?? 0;
+  const inCount = allVisitors.filter((v:any)=>v.status==="IN").length;
+  const outCount = allVisitors.filter((v:any)=>v.status==="OUT").length;
 
   return (
     <>

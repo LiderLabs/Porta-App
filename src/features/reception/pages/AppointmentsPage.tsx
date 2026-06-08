@@ -305,10 +305,10 @@ export function AppointmentsPage() {
     setMessage("");
   };
 
-  const TAB_NAV: {id:PageTab;label:string;desc:string}[] = [
+  const TAB_NAV: {id:PageTab;label:string;desc:string;badge?:number}[] = [
     {id:"checkin",  label:"Check In",  desc:"Today's arrivals"},
     {id:"new",      label:"New Appointment", desc:"Book an appointment"},
-    {id:"schedule", label:"Schedule",  desc:"All appointments"},
+    {id:"schedule", label:"Schedule",  desc:"All appointments", badge:(visits??[]).filter((v:any)=>v.status==="pending").length},
   ];
 
   const CheckInRow = ({v, isAppt}:{v:any;isAppt:boolean}) => {
@@ -531,52 +531,117 @@ export function AppointmentsPage() {
               marginBottom:-1, transition:"color .15s", fontFamily:"inherit",
             }}>
             {t.label}
+            {(t.badge??0)>0?<span style={{marginLeft:5,background:"#e3b341",color:"#000",fontSize:10,fontWeight:700,padding:"1px 5px",borderRadius:20,minWidth:16,textAlign:"center",display:"inline-block",lineHeight:"16px"}}>{t.badge}</span>:null}
           </button>
         ))}
       </div>
 
       {pageTab==="checkin"&&(
-        <div>
-          {todayAppts.length===0&&todayWalkInsIn.length===0?(
-            <div className="card-empty" style={{padding:40,textAlign:"center"}}>
-              <div style={{fontSize:32,marginBottom:8}}>&#x1F44B;</div>
-              <div style={{fontWeight:600,color:"var(--text,#e6edf3)"}}>No visitors today yet</div>
-              <div style={{color:"var(--muted,#8b949e)",fontSize:13,marginTop:4}}>Scheduled appointments will appear here when they arrive.</div>
+        <div style={{display:"flex",flexDirection:"column",gap:36}}>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:12}}>Today &mdash; Check In</div>
+            {todayAppts.length===0&&todayWalkInsIn.length===0?(
+              <div className="card-empty" style={{padding:32,textAlign:"center",background:"var(--surface,#161b22)",border:"1px solid var(--border,#30363d)",borderRadius:12}}>
+                <div style={{fontSize:28,marginBottom:8}}>&#x1F44B;</div>
+                <div style={{fontWeight:600,color:"var(--text,#e6edf3)"}}>No visitors today yet</div>
+                <div style={{color:"var(--muted,#8b949e)",fontSize:13,marginTop:4}}>Scheduled appointments will appear here when they arrive.</div>
+              </div>
+            ):(
+              <div style={{display:"flex",flexDirection:"column",gap:20}}>
+                {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length>0&&(
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>Awaiting arrival &mdash; {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length}</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                      {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).map((v:any)=>(
+                        <CheckInRow key={v._id} v={v} isAppt={true}/>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length>0||todayWalkInsIn.length>0)&&(
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>On premises &mdash; {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length+todayWalkInsIn.length}</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                      {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).map((v:any)=>(
+                        <CheckInRow key={v._id} v={v} isAppt={true}/>
+                      ))}
+                      {todayWalkInsIn.map((v:any)=>(
+                        <CheckInRow key={v._id} v={v} isAppt={false}/>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:12}}>All Appointments</div>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+              <div className="filter-tabs">
+                {FILTER_OPTIONS.map(f=>{
+                  const cnt = f==="ALL"?(visits?.length??0):(visits??[]).filter((v:any)=>v.status===f||(f==="approved"&&v.status==="accepted")).length;
+                  const urgent = f==="pending"&&cnt>0;
+                  return (
+                    <button key={f} className={`filter-tab${filter===f?" filter-tab--active":""}`} onClick={()=>setFilter(f)} style={{display:"flex",alignItems:"center",gap:5}}>
+                      {f==="ALL"?"All":STATUS_LABEL[f]??f}
+                      {cnt>0?<span style={{fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:20,minWidth:16,textAlign:"center",display:"inline-block",background:urgent?"#e3b341":filter===f?"rgba(63,185,80,0.2)":"var(--hov,#2d333b)",color:urgent?"#000":filter===f?"var(--accent,#3fb950)":"var(--muted,#8b949e)"}}>{cnt}</span>:null}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="header-search" style={{width:220,marginLeft:"auto"}}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input className="header-search-input" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
+              </div>
             </div>
-          ):(
-            <div style={{display:"flex",flexDirection:"column",gap:20}}>
-              {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length>0&&(
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>
-                    Awaiting arrival &mdash; {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).length}
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {todayAppts.filter((v:any)=>["pending","approved","accepted"].includes(v.status)).map((v:any)=>(
-                      <CheckInRow key={v._id} v={v} isAppt={true}/>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {(todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length>0||todayWalkInsIn.length>0)&&(
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:8}}>
-                    On premises &mdash; {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).length+todayWalkInsIn.length}
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {todayAppts.filter((v:any)=>["checked_in","in_meeting"].includes(v.status)).map((v:any)=>(
-                      <CheckInRow key={v._id} v={v} isAppt={true}/>
-                    ))}
-                    {todayWalkInsIn.map((v:any)=>(
-                      <CheckInRow key={v._id} v={v} isAppt={false}/>
-                    ))}
-                  </div>
-                </div>
+            <div className="table-card">
+              {visits===undefined?(<div className="card-empty">Loading...</div>)
+              :filteredAppts.length===0?(<div className="card-empty">No appointments found.</div>):(
+                <table className="visitors-table">
+                  <thead><tr><th>Visitor</th><th>Purpose</th><th>Scheduled</th><th>Host</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {filteredAppts.map((v:any)=>{
+                      const actions = TRANSITIONS[v.status]??[];
+                      return (
+                        <tr key={v._id} onClick={()=>setSelectedVisit(v)} style={{cursor:"pointer"}} className={selectedVisit?._id===v._id?"row--selected":""}>
+                          <td>
+                            <div className="table-name-cell">
+                              <div className="visitor-avatar visitor-avatar--scheduled visitor-avatar--sm">{v.visitorName[0].toUpperCase()}</div>
+                              <div>
+                                <div className="table-name">{v.visitorName}</div>
+                                {v.visitorEmail&&<div className="table-sub">{v.visitorEmail}</div>}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="table-muted">{v.purpose??"\u2014"}</td>
+                          <td className="table-muted">{new Date(v.scheduledDate).toLocaleDateString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</td>
+                          <td className="table-muted">{v.hostName??"\u2014"}</td>
+                          <td><span className={`badge ${STATUS_COLOR[v.status]??""}`}>{STATUS_LABEL[v.status]??v.status}</span></td>
+                          <td onClick={e=>e.stopPropagation()}>
+                            <div className="row-actions">
+                              {actions.map(a=>(<button key={a.action} className={`action-btn ${a.cls}`} onClick={()=>handleAction(a.action,v)}>{a.label}</button>))}
+                              {["pending","approved","accepted"].includes(v.status)?<button className="action-btn action-btn--reschedule" onClick={()=>{setSelectedVisit(v);setShowReschedule(true);}}>&#x21BB; Reschedule</button>:null}
+                              <button className="action-btn action-btn--delete" onClick={()=>deleteVisit({visitId:v._id})}>Delete</button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               )}
             </div>
-          )}
+          </div>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"var(--muted,#8b949e)",marginBottom:12}}>Schedule Calendar</div>
+            <LiveCalendar
+              visits={liveCalendar?.visits??(visits??[])}
+              blockedSlots={liveCalendar?.blockedSlots??[]}
+              onSelectVisit={setSelectedVisit}
+            />
+          </div>
         </div>
       )}
-
       {pageTab==="new"&&(
         <div style={{maxWidth:640}}>
           <div className="table-card" style={{padding:28}}>
@@ -880,6 +945,7 @@ export function AppointmentsPage() {
     </div>
   );
 }
+
 
 
 
