@@ -31,10 +31,10 @@ export function AppLayout() {
     localStorage.setItem("porta-theme", theme);
   }, [theme]);
   const { hide } = useHideOverlay();
-  const linkClerkUser = useMutation(api.invites.linkClerkUser);
+  const autoLinkStaff = useMutation(api.staff.autoLinkByEmail);
   useEffect(() => {
     if (user?.id && user?.primaryEmailAddress?.emailAddress) {
-      linkClerkUser({ clerkUserId: user.id, email: user.primaryEmailAddress.emailAddress }).catch(() => {});
+      autoLinkStaff({ clerkUserId: user.id, email: user.primaryEmailAddress.emailAddress }).catch(() => {});
     }
   }, [user?.id]);
 
