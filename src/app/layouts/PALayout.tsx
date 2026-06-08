@@ -166,7 +166,3 @@ export default PALayout;
 
 
 
-
-
-
-
