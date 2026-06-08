@@ -61,7 +61,8 @@ export function SchedulePage() {
     api.scheduling.getBlockedSlots,
     staffRecord?._id ? { staffId: staffRecord._id } : "skip"
   );
-  const rooms = useQuery(api.rooms.listActive);
+  const orgId = (staffRecord as any)?.orgId as string | undefined;
+  const rooms = useQuery(api.rooms.listActive, orgId ? { orgId } : "skip");
 
   const approveVisit   = useMutation(api.scheduling.approve);
   const rejectVisit    = useMutation(api.scheduling.reject);
