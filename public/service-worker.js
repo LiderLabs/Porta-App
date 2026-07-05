@@ -1,4 +1,4 @@
-const CACHE_NAME = 'porta-app-v1';
+﻿const CACHE_NAME = 'porta-app-1783284071775';
 const urlsToCache = ['/', '/Porta.png', '/Porta_fav.png'];
 
 self.addEventListener('install', (event) => {
@@ -19,6 +19,16 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Network-first for page navigations so index.html (and its JS bundle refs) is always fresh
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/'))
+    );
+    return;
+  }
+
+  // Cache-first for everything else (images, static assets)
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request))
   );

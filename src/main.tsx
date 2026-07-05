@@ -19,11 +19,19 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 );
 
 
-// PWA service worker
-if ('serviceWorker' in navigator) {
+// PWA service worker - production only, never in local dev
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
-      .then((reg) => console.log('SW registered:', reg.scope))
+      .then((reg) => {
+        console.log('SW registered:', reg.scope);
+        reg.update();
+      })
       .catch((err) => console.log('SW failed:', err));
   });
+} else if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((r) => r.unregister());
+  });
 }
+
