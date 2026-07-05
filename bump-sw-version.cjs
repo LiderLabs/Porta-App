@@ -1,4 +1,4 @@
-﻿const fs = require("fs");
+const fs = require("fs");
 const path = require("path");
 
 const swPath = path.join(__dirname, "public", "service-worker.js");
