@@ -1,4 +1,4 @@
-﻿import { useUser } from "@clerk/clerk-react";
+import { useUser, useClerk } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
 
 const ROLE_LANDING: Record<string, string> = {
@@ -23,6 +23,16 @@ const Splash = () => (
   </div>
 );
 
+const NoAccess = ({ message }: { message: string }) => {
+  const { signOut } = useClerk();
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:16,alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0d1117",color:"#8b949e",fontFamily:"DM Sans,sans-serif",textAlign:"center",padding:24}}>
+      <div>{message}</div>
+      <button onClick={() => signOut()} style={{background:"#21262d",color:"#c9d1d9",border:"1px solid #30363d",borderRadius:8,padding:"8px 16px",cursor:"pointer",fontFamily:"inherit"}}>Sign out</button>
+    </div>
+  );
+};
+
 export default function RoleRouter() {
   const { isLoaded, user } = useUser();
 
@@ -33,12 +43,10 @@ export default function RoleRouter() {
   if (!user) return <Navigate to="/login" replace />;
 
   const role = (user.publicMetadata as any)?.role;
-  console.log("RoleRouter: user=", user?.id, "role=", role, "metadata=", JSON.stringify(user?.publicMetadata));
-  if (!role) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0d1117",color:"#8b949e",fontFamily:"DM Sans,sans-serif"}}>
-      Account not configured. Contact your admin.
-    </div>
-  );
-  return <Navigate to={ROLE_LANDING[role] ?? "/staff/home"} replace />;
+  if (!role) return <NoAccess message="Account not configured. Contact your admin." />;
+  const landing = ROLE_LANDING[role];
+  // A role we do not recognise must never fall through into the staff area.
+  if (!landing) return <NoAccess message="Your account role is not recognised. Contact your admin." />;
+  return <Navigate to={landing} replace />;
 }
 
