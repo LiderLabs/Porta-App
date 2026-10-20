@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useUser } from "@clerk/clerk-react";
@@ -20,7 +20,7 @@ export function SpacesPage() {
   const staffRecord = useQuery(api.staff.getByClerkId, user?.id ? { clerkUserId: user.id } : "skip");
   const orgId = (staffRecord?.orgId ?? (user?.publicMetadata as any)?.orgId) as string | undefined;
   const rooms = useQuery(api.rooms.listActive, orgId ? { orgId } : "skip");
-  const allVisits = useQuery(api.scheduling.listByOrg, orgId ? { orgId } : "skip");
+  const allVisits = useQuery(api.scheduling.listByOrg, {});
   const createVisit = useMutation(api.scheduling.createByStaff);
 
   const [selectedRoom, setSelectedRoom] = useState<any>(null);

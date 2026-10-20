@@ -1,4 +1,4 @@
-﻿import { LiveCalendar } from "../../shared/LiveCalendar";
+import { LiveCalendar } from "../../shared/LiveCalendar";
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -164,7 +164,7 @@ export function SchedulePage() {
       const today = new Date().toISOString().split("T")[0];
       const start = new Date(`${today}T${breakForm.startTime}`).getTime();
       const end   = new Date(`${today}T${breakForm.endTime}`).getTime();
-      await blockSlot({ staffId: staffRecord._id, startTime: start, endTime: end, reason: breakForm.reason || undefined, createdByClerkId: user?.id ?? "" });
+      await blockSlot({ staffId: staffRecord._id, startTime: start, endTime: end, reason: breakForm.reason || undefined });
       setBreakForm({ startTime:"", endTime:"", reason:"" });
       setShowBreakForm(false);
     } finally { setBreakSaving(false); }

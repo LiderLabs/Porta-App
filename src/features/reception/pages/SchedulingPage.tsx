@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import * as React from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -254,7 +254,7 @@ export function SchedulingPage() {
 
   const handleSend = async () => {
     if (!message.trim() || !selectedVisit) return;
-    await sendMessage({ visitId: selectedVisit._id, senderClerkId: user?.id ?? "", senderName: user?.fullName ?? "Receptionist", senderRole:"receptionist", message: message.trim() });
+    await sendMessage({ visitId: selectedVisit._id, message: message.trim() });
     setMessage("");
   };
 
@@ -683,7 +683,7 @@ export function SchedulingPage() {
       )}
 
       {/* ── reschedule modal ── */}
-      {notifyModal && (<NotifyModal isOpen={true} onClose={() => setNotifyModal(null)} template={notifyModal.template} data={notifyModal.data} target={notifyModal.target} title={notifyModal.title} onInApp={notifyModal.target==="host" && selectedVisit ? (msg) => { sendMessage({ visitId: selectedVisit._id, senderClerkId: user?.id ?? "", senderName: user?.fullName ?? "Receptionist", senderRole:"receptionist", message: msg }); setNotifyModal(null); } : undefined} />)}
+      {notifyModal && (<NotifyModal isOpen={true} onClose={() => setNotifyModal(null)} template={notifyModal.template} data={notifyModal.data} target={notifyModal.target} title={notifyModal.title} onInApp={notifyModal.target==="host" && selectedVisit ? (msg) => { sendMessage({ visitId: selectedVisit._id, message: msg }); setNotifyModal(null); } : undefined} />)}
       {showReschedule && selectedVisit && (
         <RescheduleModal visit={selectedVisit} onClose={() => setShowReschedule(false)} onDone={() => setShowReschedule(false)} />
       )}

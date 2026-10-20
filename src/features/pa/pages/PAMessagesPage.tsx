@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useUser } from "@clerk/clerk-react";
@@ -37,7 +37,7 @@ export function PAMessagesPage() {
 
   const handleSend = async () => {
     if (!draft.trim() || !selectedClerkId || !user?.id) return;
-    await sendMsg({ fromClerkId: user.id, toClerkId: selectedClerkId, message: draft.trim() });
+    await sendMsg({ toClerkId: selectedClerkId, message: draft.trim() });
     setDraft("");
   };
 

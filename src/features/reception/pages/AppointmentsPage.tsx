@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import * as React from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -230,7 +230,7 @@ export function AppointmentsPage() {
 
   const handleSend = async () => {
     if (!message.trim()||!selectedVisit) return;
-    await sendMessage({visitId:selectedVisit._id, senderClerkId:user?.id??"", senderName:user?.fullName??"Receptionist", senderRole:"receptionist", message:message.trim()});
+    await sendMessage({visitId:selectedVisit._id, message:message.trim()});
     setMessage("");
   };
 

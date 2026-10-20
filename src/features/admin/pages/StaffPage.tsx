@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { useState } from "react";
 import { parseError } from "../../../lib/parseError";
 import { useQuery, useMutation, useAction } from "convex/react";
@@ -116,7 +116,7 @@ export function StaffPage() {
   const [error, setError]         = useState("");
   const [search, setSearch]       = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
-  const [form, setForm] = useState({ name: "", email: "", role: "employee" as StaffRole, department: "" });
+  const [form, setForm] = useState({ name: "", email: "", whatsappNumber: "", role: "employee" as StaffRole, department: "" });
 
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [deleting, setDeleting]         = useState(false);
@@ -168,9 +168,9 @@ export function StaffPage() {
     setSub(true); setError("");
     try {
       const orgId = (user?.publicMetadata as any)?.orgId ?? myOrg?.orgId ?? myOrg?._id;
-      await sendInvite({ ...form, invitedByClerkId: user?.id ?? "", invitedByName: user?.fullName ?? "Admin", orgId });
+      await sendInvite({ ...form });
       setShowModal(false);
-      setForm({ name: "", email: "", role: "employee", department: "" });
+      setForm({ name: "", email: "", whatsappNumber: "", role: "employee", department: "" });
     } catch (e: any) {
       setError(parseError(e));
     } finally { setSub(false); }

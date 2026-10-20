@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 // @ts-ignore
 import { api } from "../../../../convex/_generated/api";
@@ -33,7 +33,7 @@ export function AdminMessagesPage() {
 
   const handleSend = async () => {
     if (!text.trim() || !selected) return;
-    await sendMsg({ fromClerkId: myId, fromName: myName, fromRole: myRole, toClerkId: selected.id, toName: selected.name, message: text.trim() });
+    await sendMsg({ toClerkId: selected.id, toName: selected.name, message: text.trim() });
     setText("");
   };
 

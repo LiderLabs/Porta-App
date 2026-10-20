@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/clerk-react";
 import { api } from "../../../../convex/_generated/api";
@@ -17,7 +17,7 @@ export function SecurityPage() {
     if (!form.reason) return;
     setSub(true);
     try {
-      await addEntry({ ...form, fullName:form.fullName||undefined, email:form.email||undefined, phone:form.phone||undefined, addedByClerkId:user?.id??"", addedByName:user?.fullName??"Admin" });
+      await addEntry({ ...form, fullName:form.fullName||undefined, email:form.email||undefined, phone:form.phone||undefined });
       setShowModal(false);
       setForm({fullName:"",email:"",phone:"",reason:""});
     } finally { setSub(false); }

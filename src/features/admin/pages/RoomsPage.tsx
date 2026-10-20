@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery, useMutation } from "convex/react";
 // @ts-ignore
@@ -47,7 +47,7 @@ export function RoomsPage() {
       if (editing) {
         await update({ roomId:editing._id, name:form.name.trim(), floor:form.floor||undefined, capacity:form.capacity?parseInt(form.capacity):undefined, amenities:form.amenities.length?form.amenities:undefined, status:form.status });
       } else {
-        await create({ name:form.name.trim(), floor:form.floor||undefined, capacity:form.capacity?parseInt(form.capacity):undefined, amenities:form.amenities.length?form.amenities:undefined, orgId });
+        await create({ name:form.name.trim(), floor:form.floor||undefined, capacity:form.capacity?parseInt(form.capacity):undefined, amenities:form.amenities.length?form.amenities:undefined });
       }
       setShowForm(false); resetForm(); setEditing(null);
     } finally { setSaving(false); }

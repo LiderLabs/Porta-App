@@ -19,6 +19,7 @@ export function CheckInPage() {
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState("");
   const [actioningId, setActioningId] = useState<string | null>(null);
+  const [hostQ, setHostQ]     = useState("");
 
   const [form, setForm] = useState({
     fullName: "", phone: "", email: "", company: "",
@@ -70,6 +71,7 @@ export function CheckInPage() {
         idNumber:  form.idNumber || undefined,
       });
       setForm({ fullName:"", phone:"", email:"", company:"", purpose:"", hostId:"", idType:"", idNumber:"" });
+      setHostQ("");
       setShowWalkIn(false);
     } catch { setError("Check-in failed. Please try again."); }
     finally { setLoading(false); }
@@ -244,7 +246,7 @@ export function CheckInPage() {
                 <button className="ci-modal-close" onClick={() => setShowWalkIn(false)}>x</button>
               </div>
               <div className="ci-modal-body">
-                <div className="ci-walkin-banner">Walk-in — visitor will be immediately checked in</div>
+                <div className="ci-walkin-banner">Walk-in — visitor is checked in now and the host is notified</div>
                 <form id="walkin-form" onSubmit={handleWalkIn}>
                   <div className="ci-form-grid">
                     <div className="ci-field">
@@ -270,14 +272,21 @@ export function CheckInPage() {
                         {PURPOSES.map((p) => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </div>
-                    <div className="ci-field">
+                    <div className="ci-field ci-field--full">
                       <label className="ci-field-label">Host</label>
+                      <input className="ci-input" placeholder="Search by name or department..." value={hostQ} onChange={(e) => setHostQ(e.target.value)} />
                       <select className="ci-input" value={form.hostId} onChange={(e) => set("hostId", e.target.value)}>
                         <option value="">Select host...</option>
-                        {staff?.map((s: any) => (
-                          <option key={s._id} value={s._id}>{s.name}{s.department ? ` — ${s.department}` : ""}</option>
-                        ))}
+                        {(staff ?? [])
+                          .filter((s: any) => {
+                            const q = hostQ.trim().toLowerCase();
+                            return !q || s._id === form.hostId || `${s.name ?? ""} ${s.department ?? ""}`.toLowerCase().includes(q);
+                          })
+                          .map((s: any) => (
+                            <option key={s._id} value={s._id}>{s.name}{s.department ? ` — ${s.department}` : ""}</option>
+                          ))}
                       </select>
+                      <span style={{ fontSize: "0.75rem", color: "var(--muted,#8b949e)" }}>The host is emailed when you check the visitor in.</span>
                     </div>
                     <div className="ci-field">
                       <label className="ci-field-label">ID type</label>
