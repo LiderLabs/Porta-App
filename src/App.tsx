@@ -14,6 +14,7 @@ import { PALayout }               from "./app/layouts/PALayout";
 import { AppointmentsPage }       from "./features/reception/pages/AppointmentsPage";
 import { SchedulingPage }         from "./features/reception/pages/SchedulingPage";
 import { CheckInPage }            from "./features/reception/pages/CheckInPage";
+import { StaffAgendaPage } from "./features/reception/pages/StaffAgendaPage";
 import { VisitorsPage }           from "./features/reception/pages/VisitorsPage";
 import { AnalyticsPage }          from "./features/reception/pages/AnalyticsPage";
 import { MessagesPage as ReceptionMessagesPage } from "./features/reception/pages/MessagesPage";
@@ -120,6 +121,7 @@ function AppRoutes() {
               <Route path="/reception/appointments" element={<AppointmentsPage />} />
               <Route path="/reception/scheduling"   element={<SchedulingPage />} />
               <Route path="/reception/checkin"      element={<CheckInPage />} />
+              <Route path="/reception/agenda"       element={<StaffAgendaPage />} />
               <Route path="/reception/visitors"     element={<VisitorsPage />} />
               {/* <Route path="/reception/analytics"    element={<AnalyticsPage />} /> */}
               <Route path="/reception/messages"     element={<ReceptionMessagesPage />} />
