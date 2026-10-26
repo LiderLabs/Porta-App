@@ -12,8 +12,7 @@ import { PALayout }               from "./app/layouts/PALayout";
 
 
 import { AppointmentsPage }       from "./features/reception/pages/AppointmentsPage";
-import { SchedulingPage }         from "./features/reception/pages/SchedulingPage";
-import { CheckInPage }            from "./features/reception/pages/CheckInPage";
+import { FrontDeskPage }          from "./features/reception/pages/FrontDeskPage";
 import { StaffAgendaPage } from "./features/reception/pages/StaffAgendaPage";
 import { VisitorsPage }           from "./features/reception/pages/VisitorsPage";
 import { AnalyticsPage }          from "./features/reception/pages/AnalyticsPage";
@@ -119,8 +118,9 @@ function AppRoutes() {
           <Route element={<RoleGuard allowed={["receptionist"]} fallback="/" />}>
             <Route element={<ReceptionLayout />}>
               <Route path="/reception/appointments" element={<AppointmentsPage />} />
-              <Route path="/reception/scheduling"   element={<SchedulingPage />} />
-              <Route path="/reception/checkin"      element={<CheckInPage />} />
+              <Route path="/reception/front-desk"   element={<FrontDeskPage />} />
+              <Route path="/reception/checkin"      element={<Navigate to="/reception/front-desk" replace />} />
+              <Route path="/reception/scheduling"   element={<Navigate to="/reception/appointments" replace />} />
               <Route path="/reception/agenda"       element={<StaffAgendaPage />} />
               <Route path="/reception/visitors"     element={<VisitorsPage />} />
               {/* <Route path="/reception/analytics"    element={<AnalyticsPage />} /> */}

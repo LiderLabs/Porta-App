@@ -1,267 +1,158 @@
-﻿import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { useMemo, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { api } from "../../../../convex/_generated/api";
+import "../reception.css";
+import { MIN, fmtDateTime, fmtTime, startOfDay } from "../lib";
+import { Modal, StatusBadge } from "../parts";
 
-type Filter = "ALL" | "IN" | "OUT";
+type Filter = "all" | "onsite" | "left";
+type Range = "today" | "week" | "month" | "all";
 
-function hashColor(name: string) {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
-  const hue = Math.abs(h) % 360;
-  return `linear-gradient(135deg,hsl(${hue},55%,28%),hsl(${(hue+50)%360},65%,20%))`;
-}
+type V = {
+  id: string; source: "visit" | "walkin"; name: string; company: string; phone: string; email: string;
+  purpose: string; host: string; arrived: number; left?: number; onSite: boolean; status: string;
+};
 
-function exportCSV(visitors: any[]) {
-  const rows = [
-    ["Name","Company","Phone","Email","Purpose","Status","Check-in Time"],
-    ...visitors.map(v=>[v.fullName,v.company??"",v.phone??"",v.email??"",v.purpose??"",v.status,new Date(v.checkInTime).toLocaleString()]),
-  ];
-  const csv = rows.map(r=>r.map(c=>JSON.stringify(c)).join(",")).join("\n");
+const RANGES: { id: Range; label: string; days: number }[] = [
+  { id: "today", label: "Today", days: 0 },
+  { id: "week", label: "7 days", days: 7 },
+  { id: "month", label: "30 days", days: 30 },
+  { id: "all", label: "All time", days: -1 },
+];
+
+function exportCSV(rows: V[]) {
+  const head = ["Name", "Company", "Phone", "Email", "Purpose", "Host", "Arrived", "Left", "Status"];
+  const body = rows.map((v) => [
+    v.name, v.company, v.phone, v.email, v.purpose, v.host,
+    new Date(v.arrived).toLocaleString(), v.left ? new Date(v.left).toLocaleString() : "", v.onSite ? "On site" : "Left",
+  ]);
+  const csv = [head, ...body].map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download = "visitors.csv"; a.click();
+  a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+  a.download = `visitors-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 export function VisitorsPage() {
-  const [filter, setFilter]   = useState<Filter>("ALL");
-  const [search, setSearch]   = useState("");
-  const [selected, setSelected] = useState<any | null>(null);
-  const [checkingOut, setCheckingOut] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [params] = useSearchParams();
-  const navigate  = useNavigate();
-  const visitors  = useQuery(api.visitors.list);
-  const checkOut  = useMutation(api.visitors.checkOut);
-  const scheduledVisits = useQuery(api.scheduling.list);
+  const walkIns = useQuery(api.visitors.list);
+  const visits = useQuery(api.scheduling.list);
+  const checkOutWalkIn = useMutation(api.visitors.checkOut);
+  const markCompleted = useMutation(api.scheduling.markCompleted);
 
-  const effectiveSearch = search || (params.get("search") ?? "");
-  const scheduledAsVisitors = (scheduledVisits ?? []).map((v: any) => ({
-    _id: v._id, fullName: v.visitorName ?? v.fullName ?? "",
-    company: v.company ?? "", phone: v.phone ?? "", email: v.email ?? "",
-    purpose: v.purpose ?? "", checkInTime: v.scheduledDate,
-    status: (v.status === "checked_in" || v.status === "in_meeting") ? "IN" : v.status === "completed" ? "OUT" : v.status,
-    _source: "scheduled", hostName: v.hostName ?? "",
-  }));
-  const allVisitors = [...(visitors ?? []).map((v:any)=>({...v,_source:"walkin"})), ...scheduledAsVisitors];
-  const filtered = allVisitors.filter((v: any) => {
-    const okFilter = filter === "ALL" || v.status === filter;
-    const okSearch = !effectiveSearch ||
-      v.fullName.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
-      (v.company??"").toLowerCase().includes(effectiveSearch.toLowerCase()) ||
-      (v.purpose??"").toLowerCase().includes(effectiveSearch.toLowerCase());
-    return okFilter && okSearch;
-  });
-  const handleCheckOut = async (id: string) => {
-    setCheckingOut(id);
-    try { await checkOut({ visitorId: id as any }); } finally { setCheckingOut(null); }
+  const [filter, setFilter] = useState<Filter>("all");
+  const [range, setRange] = useState<Range>("week");
+  const [q, setQ] = useState(params.get("search") ?? "");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  // People who actually came: appointments that were checked in, plus the older walk-in log.
+  const all: V[] = useMemo(() => {
+    const fromVisits: V[] = ((visits ?? []) as any[])
+      .filter((v) => ["checked_in", "in_meeting", "completed"].includes(v.status))
+      .map((v) => ({
+        id: v._id, source: "visit", name: v.visitorName ?? "Visitor", company: v.visitorCompany ?? "",
+        phone: v.visitorPhone ?? "", email: v.visitorEmail ?? "", purpose: v.purpose ?? "", host: v.hostName ?? "",
+        arrived: v.checkInTime ?? v.scheduledDate, left: v.checkOutTime ?? v.completedAt, onSite: v.status !== "completed", status: v.status,
+      }));
+    const fromWalkIns: V[] = ((walkIns ?? []) as any[]).map((w) => ({
+      id: w._id, source: "walkin", name: w.fullName ?? "Visitor", company: w.company ?? "", phone: w.phone ?? "",
+      email: w.email ?? "", purpose: w.purpose ?? "", host: w.hostName ?? "", arrived: w.checkInTime, left: w.checkOutTime,
+      onSite: w.status === "IN", status: w.status === "IN" ? "checked_in" : "completed",
+    }));
+    return [...fromVisits, ...fromWalkIns].sort((a, b) => b.arrived - a.arrived);
+  }, [visits, walkIns]);
+
+  const since = useMemo(() => {
+    const r = RANGES.find((x) => x.id === range)!;
+    return r.days < 0 ? 0 : startOfDay(Date.now()) - r.days * 24 * 60 * MIN;
+  }, [range]);
+
+  const inRange = all.filter((v) => v.arrived >= since);
+  const needle = q.trim().toLowerCase();
+  const shown = inRange
+    .filter((v) => filter === "all" || (filter === "onsite" ? v.onSite : !v.onSite))
+    .filter((v) => !needle || `${v.name} ${v.company} ${v.purpose} ${v.host} ${v.email}`.toLowerCase().includes(needle));
+  const onSiteCount = inRange.filter((v) => v.onSite).length;
+
+  const checkOut = async (v: V) => {
+    setBusy(v.id); setError("");
+    try {
+      if (v.source === "walkin") await checkOutWalkIn({ visitorId: v.id as any });
+      else await markCompleted({ visitId: v.id as any });
+    } catch {
+      setError("Could not check that visitor out. Try again.");
+    } finally {
+      setBusy(null);
+    }
   };
-  const inCount = allVisitors.filter((v:any)=>v.status==="IN").length;
-  const outCount = allVisitors.filter((v:any)=>v.status==="OUT").length;
+
+  const selected = selectedId ? all.find((v) => v.id === selectedId) : null;
+  const loading = visits === undefined || walkIns === undefined;
 
   return (
-    <>
-      <style>{`
-        .vp { padding: 0; }
-        .vp-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; gap:16px; flex-wrap:wrap; }
-        .vp-title { font-size:1.4rem; font-weight:700; color:var(--text,#e6edf3); margin-bottom:4px; }
-        .vp-stats-row { display:flex; align-items:center; gap:8px; font-size:0.85rem; }
-        .vp-stat { font-weight:600; color:var(--text,#e6edf3); }
-        .vp-stat em { font-style:normal; color:var(--muted,#8b949e); font-weight:400; }
-        .vp-stat--green { color:var(--accent,#3fb950); }
-        .vp-stat--muted { color:var(--muted,#8b949e); }
-        .vp-dot { width:3px; height:3px; border-radius:50%; background:var(--muted,#8b949e); }
-        .vp-header-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-        .vp-export-btn { display:flex; align-items:center; gap:6px; padding:8px 14px; background:transparent; border:1px solid var(--border,#30363d); border-radius:8px; font-size:0.82rem; font-weight:600; color:var(--muted,#8b949e); cursor:pointer; font-family:inherit; }
-        .vp-export-btn:hover { background:var(--hov,#2d333b); color:var(--text,#e6edf3); }
-        .vp-checkin-btn { display:flex; align-items:center; gap:6px; padding:8px 16px; background:var(--accent,#3fb950); color:#fff; border:none; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer; font-family:inherit; }
-        .vp-checkin-btn:hover { opacity:0.88; }
-        .vp-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
-        .vp-search { display:flex; align-items:center; gap:8px; background:var(--surface,#21262d); border:1px solid var(--border,#30363d); border-radius:8px; padding:8px 12px; flex:1; min-width:200px; max-width:320px; }
-        .vp-search-input { background:none; border:none; outline:none; font-size:0.85rem; color:var(--text,#e6edf3); font-family:inherit; width:100%; }
-        .vp-search-input::placeholder { color:var(--muted,#8b949e); }
-        .vp-search-clear { background:none; border:none; cursor:pointer; color:var(--muted,#8b949e); font-size:14px; padding:0; line-height:1; }
-        .vp-filters { display:flex; gap:4px; }
-        .vp-filter { padding:7px 12px; border:1px solid var(--border,#30363d); border-radius:8px; background:transparent; font-size:0.8rem; font-weight:600; color:var(--muted,#8b949e); cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px; }
-        .vp-filter:hover { background:var(--hov,#2d333b); color:var(--text,#e6edf3); }
-        .vp-filter--on { background:var(--accent-bg,rgba(63,185,80,0.12)); color:var(--accent,#3fb950); border-color:transparent; }
-        .vp-filter-count { background:var(--hov,#2d333b); border-radius:999px; padding:1px 7px; font-size:0.72rem; }
-        .vp-layout { display:flex; gap:16px; align-items:flex-start; }
-        .vp-table-wrap { flex:1; min-width:0; background:var(--surface,#161b22); border:1px solid var(--border,#30363d); border-radius:12px; overflow:hidden; }
-        .vp-empty { padding:40px; text-align:center; color:var(--muted,#8b949e); font-size:0.875rem; }
-        .vp-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-        .vp-table th { text-align:left; padding:10px 16px; color:var(--muted,#8b949e); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid var(--border,#30363d); background:var(--sidebar,#161b22); }
-        .vp-table td { padding:12px 16px; border-bottom:1px solid var(--border,#30363d); color:var(--text,#e6edf3); vertical-align:middle; }
-        .vp-table tr:last-child td { border-bottom:none; }
-        .vp-table tbody tr { cursor:pointer; transition:background .1s; }
-        .vp-table tbody tr:hover td { background:var(--hov,#2d333b); }
-        .vp-row--selected td { background:var(--accent-bg,rgba(63,185,80,0.08)) !important; }
-        .vp-person { display:flex; align-items:center; gap:10px; }
-        .vp-avatar { width:34px; height:34px; border-radius:50%; color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .vp-person-name { font-weight:600; font-size:0.875rem; color:var(--text,#e6edf3); }
-        .vp-person-email { font-size:0.75rem; color:var(--muted,#8b949e); margin-top:1px; }
-        .vp-cell-muted { color:var(--muted,#8b949e); }
-        .vp-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; }
-        .vp-badge--in { background:rgba(63,185,80,0.12); color:#3fb950; }
-        .vp-badge--out { background:rgba(139,148,158,0.12); color:#8b949e; }
-        .vp-checkout-btn { padding:5px 12px; border:1px solid var(--border,#30363d); border-radius:6px; background:transparent; font-size:0.78rem; font-weight:600; color:var(--muted,#8b949e); cursor:pointer; font-family:inherit; white-space:nowrap; }
-        .vp-checkout-btn:hover { background:rgba(248,81,73,0.08); color:#f85149; border-color:rgba(248,81,73,0.3); }
-        .vp-checkout-btn:disabled { opacity:0.5; cursor:not-allowed; }
-        .vp-panel { width:280px; flex-shrink:0; background:var(--surface,#161b22); border:1px solid var(--border,#30363d); border-radius:12px; overflow:hidden; }
-        .vp-panel-top { position:relative; padding:24px 20px 16px; text-align:center; border-bottom:1px solid var(--border,#30363d); }
-        .vp-panel-avatar { width:56px; height:56px; border-radius:50%; color:#fff; font-weight:700; font-size:22px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; }
-        .vp-panel-close { position:absolute; top:12px; right:12px; background:none; border:1px solid var(--border,#30363d); border-radius:6px; cursor:pointer; color:var(--muted,#8b949e); font-size:14px; padding:3px 7px; font-family:inherit; }
-        .vp-panel-close:hover { background:var(--hov,#2d333b); color:var(--text,#e6edf3); }
-        .vp-panel-name { font-weight:700; font-size:1rem; color:var(--text,#e6edf3); margin-bottom:4px; }
-        .vp-panel-body { padding:16px 20px; }
-        .vp-panel-fields { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
-        .vp-panel-field { display:flex; flex-direction:column; gap:2px; }
-        .vp-panel-field-label { font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b949e); }
-        .vp-panel-field-value { font-size:0.85rem; color:var(--text,#e6edf3); word-break:break-word; }
-      
-    @media(max-width:768px){
-      .vp-root,.vp-page { padding:16px 12px; }
-      .vp-header { flex-direction:column; align-items:flex-start; }
-      .vp-header-actions { width:100%; justify-content:space-between; }
-      .vp-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-      .vp-filters { flex-wrap:wrap; gap:8px; }
-      .vp-search { width:100%; }
-      .vp-modal { max-width:100%; margin:0; border-radius:14px 14px 0 0; position:fixed; bottom:0; left:0; right:0; max-height:85vh; }
-      .vp-overlay { align-items:flex-end; padding:0; }
-    }
-    @media(max-width:480px){
-      .vp-stats-row { flex-wrap:wrap; }
-      .vp-table thead th:nth-child(3),
-      .vp-table thead th:nth-child(4) { display:none; }
-      .vp-table tbody td:nth-child(3),
-      .vp-table tbody td:nth-child(4) { display:none; }
-    }`}</style>
-      <div className="vp">
-        <div className="vp-header">
-          <div>
-            <h1 className="vp-title">Visitors</h1>
-            <div className="vp-stats-row">
-              <span className="vp-stat">{visitors?.length ?? 0} <em>total</em></span>
-              <span className="vp-dot"/>
-              <span className="vp-stat vp-stat--green">{inCount} <em>in</em></span>
-              <span className="vp-dot"/>
-              <span className="vp-stat vp-stat--muted">{outCount} <em>out</em></span>
-            </div>
-          </div>
-          <div className="vp-header-actions">
-            {filtered && filtered.length > 0 && (
-              <button className="vp-export-btn" onClick={() => exportCSV(filtered as any)}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export CSV
-              </button>
-            )}
-            <button className="vp-checkin-btn" onClick={() => navigate("/reception/checkin")}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Check in
-            </button>
-          </div>
+    <div className="rc">
+      <div className="rc-head">
+        <div>
+          <h1 className="rc-title">Visitors</h1>
+          <p className="rc-sub">{inRange.length} {inRange.length === 1 ? "visitor" : "visitors"} · {onSiteCount} on site</p>
         </div>
-
-        <div className="vp-toolbar">
-          <div className="vp-search">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input className="vp-search-input" placeholder="Search by name, company, purpose..." value={search} onChange={e=>setSearch(e.target.value)} />
-            {search && <button className="vp-search-clear" onClick={()=>setSearch("")}>x</button>}
-          </div>
-          <div className="vp-filters">
-            {(["ALL","IN","OUT"] as Filter[]).map(f=>(
-              <button key={f} className={`vp-filter${filter===f?" vp-filter--on":""}`} onClick={()=>setFilter(f)}>
-                {f==="ALL"?"All visitors":f==="IN"?"Checked in":"Checked out"}
-                <span className="vp-filter-count">
-                  {f==="ALL"?visitors?.length??0:f==="IN"?inCount:outCount}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="vp-layout">
-          <div className="vp-table-wrap">
-            {visitors === undefined ? (
-              <div className="vp-empty">Loading...</div>
-            ) : filtered?.length === 0 ? (
-              <div className="vp-empty">No visitors found.</div>
-            ) : (
-              <table className="vp-table">
-                <thead>
-                  <tr>
-                    <th>Visitor</th><th>Company</th><th>Purpose</th>
-                    <th>Time</th><th>Status</th><th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered?.map((v:any) => (
-                    <tr key={v._id} onClick={()=>setSelected(v)} className={selected?._id===v._id?"vp-row--selected":""}>
-                      <td>
-                        <div className="vp-person">
-                          <div className="vp-avatar" style={{background:hashColor(v.fullName)}}>{v.fullName[0].toUpperCase()}</div>
-                          <div>
-                            <div className="vp-person-name">{v.fullName}</div>
-                            {v.email && <div className="vp-person-email">{v.email}</div>}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="vp-cell-muted">{v.company||"—"}</td>
-                      <td className="vp-cell-muted">{v.purpose||"—"}</td>
-                      <td className="vp-cell-muted">{new Date(v.checkInTime).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</td>
-                      <td><span className={`vp-badge vp-badge--${v.status==="IN"?"in":"out"}`}>{v.status}</span></td>
-                      <td onClick={e=>e.stopPropagation()}>
-                        {v.status==="IN" && (
-                          <button className="vp-checkout-btn" disabled={checkingOut===v._id} onClick={()=>handleCheckOut(v._id)}>
-                            {checkingOut===v._id?"...":"Check out"}
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {selected && (
-            <div className="vp-panel">
-              <div className="vp-panel-top">
-                <div className="vp-panel-avatar" style={{background:hashColor(selected.fullName)}}>
-                  {selected.fullName[0].toUpperCase()}
-                </div>
-                <button className="vp-panel-close" onClick={()=>setSelected(null)}>x</button>
-              </div>
-              <div className="vp-panel-body">
-                <div className="vp-panel-name">{selected.fullName}</div>
-                <span className={`vp-badge vp-badge--${selected.status==="IN"?"in":"out"}`} style={{margin:"4px auto 0",display:"block",width:"fit-content"}}>{selected.status}</span>
-                <div className="vp-panel-fields">
-                  {[
-                    {label:"Company",    value:selected.company},
-                    {label:"Phone",      value:selected.phone},
-                    {label:"Email",      value:selected.email},
-                    {label:"Purpose",    value:selected.purpose},
-                    {label:"Checked in", value:new Date(selected.checkInTime).toLocaleString()},
-                    {label:"Checked out",value:selected.checkOutTime?new Date(selected.checkOutTime).toLocaleString():null},
-                  ].filter(f=>f.value).map(({label,value})=>(
-                    <div key={label} className="vp-panel-field">
-                      <span className="vp-panel-field-label">{label}</span>
-                      <span className="vp-panel-field-value">{value}</span>
-                    </div>
-                  ))}
-                </div>
-                {selected.status==="IN" && (
-                  <button className="vp-checkin-btn" style={{width:"100%",justifyContent:"center",marginTop:"16px"}}
-                    disabled={checkingOut===selected._id}
-                    onClick={()=>{handleCheckOut(selected._id);setSelected(null);}}>
-                    Check out
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+        <div className="rc-actions">
+          <button className="rc-btn" disabled={shown.length === 0} onClick={() => exportCSV(shown)}>Export CSV</button>
+          <button className="rc-btn rc-btn--primary" onClick={() => navigate("/reception/agenda")}>New visitor</button>
         </div>
       </div>
-    </>
+
+      {error && <div className="rc-notice rc-notice--red" role="alert">{error}<button className="rc-btn rc-btn--sm" onClick={() => setError("")}>Dismiss</button></div>}
+
+      <div className="rc-toolbar">
+        <input className="rc-input rc-search" type="search" placeholder="Search name, company, host" aria-label="Search visitors" value={q} onChange={(e) => setQ(e.target.value)} />
+        <div className="rc-seg" role="group" aria-label="Status">
+          {([["all", "All"], ["onsite", "On site"], ["left", "Left"]] as [Filter, string][]).map(([id, label]) => (
+            <button key={id} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>
+          ))}
+        </div>
+        <div className="rc-seg" role="group" aria-label="Period" style={{ marginLeft: "auto" }}>
+          {RANGES.map((r) => (<button key={r.id} aria-pressed={range === r.id} onClick={() => setRange(r.id)}>{r.label}</button>))}
+        </div>
+      </div>
+
+      <div className="rc-list" style={{ ["--rc-acts" as any]: "110px" }}>
+        {loading ? <div className="rc-empty">Loading...</div>
+          : shown.length === 0 ? <div className="rc-empty"><b>No visitors found</b>Try a longer period or a different search.</div>
+          : shown.map((v) => (
+            <div key={v.id} className="rc-row rc-row--click" tabIndex={0} onClick={() => setSelectedId(v.id)} onKeyDown={(e) => { if (e.key === "Enter") setSelectedId(v.id); }}>
+              <div className="rc-time">{fmtTime(v.arrived)}<small>{startOfDay(v.arrived) === startOfDay(Date.now()) ? "Today" : new Date(v.arrived).toLocaleDateString([], { day: "numeric", month: "short" })}</small></div>
+              <div className="rc-who">
+                <div className="rc-name">{v.name}</div>
+                <div className="rc-meta">{[v.purpose, v.company].filter(Boolean).join(" · ") || "No details"}</div>
+              </div>
+              <div className="rc-host">{v.host ? `Host: ${v.host}` : ""}</div>
+              <div className="rc-badge-cell"><StatusBadge status={v.onSite ? "checked_in" : "completed"} /></div>
+              <div className="rc-row-actions" onClick={(e) => e.stopPropagation()}>
+                {v.onSite && <button className="rc-btn rc-btn--sm" disabled={busy === v.id} onClick={() => checkOut(v)}>Check out</button>}
+              </div>
+            </div>
+          ))}
+      </div>
+
+      {selected && (
+        <Modal
+          title={<><h2>{selected.name}</h2><div style={{ marginTop: 6 }}><StatusBadge status={selected.onSite ? "checked_in" : "completed"} /></div></>}
+          onClose={() => setSelectedId(null)}
+          footer={selected.onSite ? <button className="rc-btn rc-btn--primary" disabled={busy === selected.id} onClick={() => checkOut(selected)}>Check out</button> : undefined}
+        >
+          <dl className="rc-facts" style={{ marginTop: 0 }}>
+            {([["Company", selected.company], ["Host", selected.host], ["Purpose", selected.purpose], ["Phone", selected.phone], ["Email", selected.email],
+              ["Arrived", fmtDateTime(selected.arrived)], ["Left", selected.left ? fmtDateTime(selected.left) : ""]] as [string, string][])
+              .filter(([, v]) => v).map(([k, v]) => (<div key={k} style={{ display: "contents" }}><dt>{k}</dt><dd>{v}</dd></div>))}
+          </dl>
+        </Modal>
+      )}
+    </div>
   );
 }
-

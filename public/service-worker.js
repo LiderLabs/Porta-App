@@ -1,4 +1,4 @@
-const CACHE_NAME = 'porta-app-1792579272608';
+const CACHE_NAME = 'porta-app-1792581117188';
 const urlsToCache = ['/', '/Porta.png', '/Porta_fav.png'];
 
 self.addEventListener('install', (event) => {

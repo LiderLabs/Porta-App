@@ -2,7 +2,7 @@
 import { useSignUp, useUser } from "@clerk/clerk-react";
 
 const ROLE_LANDING: Record<string, string> = {
-  receptionist: "/reception/appointments",
+  receptionist: "/reception/front-desk",
   employee:     "/staff/home",
   pa:           "/pa/home",
   dept_head:    "/staff/home",

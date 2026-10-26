@@ -5,7 +5,7 @@ import { useSignIn, useUser } from "@clerk/clerk-react";
 type Step = "credentials" | "mfa";
 
 const ROLE_LANDING: Record<string, string> = {
-  receptionist: "/reception/appointments",
+  receptionist: "/reception/front-desk",
   employee: "/staff/home",
   pa: "/pa/home",
   dept_head: "/staff/home",

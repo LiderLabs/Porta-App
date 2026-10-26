@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useUser } from "@clerk/clerk-react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import { Link } from "react-router-dom";
 import { NotifyModal } from "../../shared/NotifyModal";
 import type { NotifyData } from "../../shared/NotifyModal";
 
@@ -62,7 +63,7 @@ function buildHostMessage(p: {
   const intro = p.hereNow ? `${who} is at reception${why}.` : `${who} would like to see you${why}.`;
   return (
     `Hi ${p.host},\n\n${intro}\n\n` +
-    `📅 ${day}\n⏰ ${fmtTime(p.start)} – ${fmtTime(p.end)}\n\n` +
+    `Date: ${day}\nTime: ${fmtTime(p.start)} – ${fmtTime(p.end)}\n\n` +
     `Please reply:\n1 – Confirm\n2 – Suggest another time\n3 – Can't make it`
   );
 }
@@ -224,6 +225,7 @@ export function StaffAgendaPage() {
 
   // Scroll the timeline to the current time (or the first appointment) when it opens.
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bookRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || cal === undefined) return;
@@ -248,6 +250,8 @@ export function StaffAgendaPage() {
 
   const chooseHost = (id: string) => {
     setHostId(id);
+    // On phones the booking panel sits below the staff list, so bring it into view.
+    if (window.innerWidth <= 900) setTimeout(() => bookRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
     setDate(toDateInput(new Date()));
     set("time", "");
     setError("");
@@ -305,8 +309,9 @@ export function StaffAgendaPage() {
   return (
     <>
       <style>{`
+        .sa, .sa-title, .sa-sub { max-width:1120px; margin-left:auto; margin-right:auto; }
         .sa { display:grid; grid-template-columns:260px 1fr; gap:20px; align-items:start; }
-        .sa-title { font-size:1.4rem; font-weight:700; color:var(--text,#e6edf3); margin-bottom:4px; }
+        .sa-title { font-size:1.5rem; letter-spacing:-0.01em; font-weight:700; color:var(--text,#e6edf3); margin-bottom:4px; }
         .sa-sub { font-size:0.85rem; color:var(--muted,#8b949e); margin-bottom:20px; }
         .sa-card { background:var(--surface,#21262d); border:1px solid var(--border,#30363d); border-radius:12px; padding:16px; }
         .sa-card + .sa-card { margin-top:16px; }
@@ -354,13 +359,13 @@ export function StaffAgendaPage() {
         @media (max-width: 900px) { .sa { grid-template-columns:1fr; } .sa-staff-list { max-height:220px; } }
       `}</style>
 
-      <h1 className="sa-title">Staff agenda</h1>
-      <p className="sa-sub">Search for a staff member, see their day, pick a free time, then send the details to them on WhatsApp.</p>
+      <h1 className="sa-title">Book a visit</h1>
+      <p className="sa-sub">Find the host, check their day, choose a free time. The host is then messaged on WhatsApp. Tick "at reception now" for walk-ins.</p>
 
       <div className="sa">
         {/* ── staff search ─────────────────────────────────────────────── */}
         <div className="sa-card">
-          <input className="sa-input" placeholder="Search by name or department..." value={q} onChange={(e) => setQ(e.target.value)} />
+          <input className="sa-input" placeholder="Search staff" value={q} onChange={(e) => setQ(e.target.value)} />
           <div className="sa-staff-list">
             {staff === undefined ? (
               <div className="sa-empty">Loading...</div>
@@ -380,15 +385,16 @@ export function StaffAgendaPage() {
         </div>
 
         {/* ── agenda + booking ─────────────────────────────────────────── */}
-        <div>
+        <div ref={bookRef} style={{ scrollMarginTop: 72 }}>
           {!host ? (
             <div className="sa-card"><div className="sa-empty">Choose a staff member to see their agenda.</div></div>
           ) : (
             <>
               {last && (
                 <div className="sa-ok">
-                  <span>✓ {last.visitor} scheduled with {last.hostName} at {fmtTime(last.start)}.</span>
-                  <button className="sa-btn" style={{ marginLeft: "auto" }} onClick={() => setNotifyOpen(true)}>💬 Message {last.hostName} on WhatsApp</button>
+                  <span>{last.visitor} is booked with {last.hostName} at {fmtTime(last.start)}.</span>
+                  <button className="sa-btn" style={{ marginLeft: "auto" }} onClick={() => setNotifyOpen(true)}>Message {last.hostName} on WhatsApp</button>
+                  <Link className="sa-btn" to="/reception/appointments">View appointments</Link>
                 </div>
               )}
 
