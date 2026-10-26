@@ -35,6 +35,7 @@ import { StaffPage }              from "./features/admin/pages/StaffPage";
 import { BookingRulesPage }       from "./features/admin/pages/BookingRulesPage";
 import { DepartmentsPage }        from "./features/admin/pages/DepartmentsPage";
 import { SecurityPage }           from "./features/admin/pages/SecurityPage";
+import { ActivityPage }           from "./features/admin/pages/ActivityPage";
 import { CheckInFormPage }        from "./features/admin/pages/CheckInFormPage";
 import { SetupPage }              from "./features/admin/pages/SetupPage";
 
@@ -158,6 +159,7 @@ function AppRoutes() {
               <Route path="/admin/booking-rules" element={<BookingRulesPage />} />
               <Route path="/admin/departments"   element={<DepartmentsPage />} />
               <Route path="/admin/security"      element={<SecurityPage />} />
+              <Route path="/admin/activity"      element={<ActivityPage />} />
               <Route path="/admin/checkin-form"  element={<CheckInFormPage />} />
               <Route path="/admin/setup"         element={<SetupPage />} />
           <Route path="/admin/profile" element={<ProfilePage />} />

@@ -2,8 +2,9 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useUser, useClerk } from "@clerk/clerk-react";
-import { LayoutDashboard, Users, Building2, CalendarCog, ClipboardList, ShieldAlert, DoorOpen, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Users, Building2, CalendarCog, ClipboardList, ShieldAlert, DoorOpen, MessageSquare, History } from "lucide-react";
 import { useState, useEffect, createContext, useContext } from "react";
+import { OrgBrand } from "../../features/shared/OrgBrand";
 
 export const ThemeContext = createContext<{ dark: boolean; toggle: () => void }>({ dark: true, toggle: () => {} });
 export const useTheme = () => useContext(ThemeContext);
@@ -16,6 +17,7 @@ const NAV = [
   { to: "/admin/checkin-form",  label: "Check-in form",    Icon: ClipboardList },
   { to: "/admin/rooms", label: "Rooms", Icon: DoorOpen },
   { to: "/admin/security",      label: "Security",         Icon: ShieldAlert },
+  { to: "/admin/activity",      label: "Activity log",     Icon: History },
   { to: "/admin/messages",      label: "Messages",         Icon: MessageSquare },
 ];
 
@@ -29,9 +31,9 @@ export function AdminLayout() {
   const myOrg = useQuery(api.orgSettings.getMyOrg);
   const unreadCount = useQuery(api.directMessages.unreadCount, user?.id ? { clerkUserId: user.id } : "skip") ?? 0;
   const orgName = myOrg?.name || orgSettings?.branding?.appName || "Porta";
-  const [dark, setDark] = useState(() => { const s = localStorage.getItem("porta-theme"); return s ? s === "dark" : true; });
-  useEffect(() => { localStorage.setItem("porta-theme", dark ? "dark" : "light"); document.documentElement.setAttribute("data-theme", dark ? "dark" : "light"); }, [dark]);
-  const toggle = () => setDark(d => !d);
+  const dark = true;
+  const toggle = () => {};
+  useEffect(() => { document.documentElement.setAttribute("data-theme", "dark"); try { localStorage.removeItem("porta-theme"); } catch {} }, []);
   const t = dark
     ? { bg:"#0d1117",sidebar:"#161b22",border:"#30363d",text:"#e6edf3",textMuted:"#8b949e",surface:"#21262d",surfaceHov:"#2d333b",accent:"#3fb950",accentBg:"rgba(63,185,80,0.12)",navHov:"#2d333b" }
     : { bg:"#f8fafc",sidebar:"#ffffff",border:"#e2e8f0",text:"#0f172a",textMuted:"#64748b",surface:"#ffffff",surfaceHov:"#f1f5f9",accent:"#16a34a",accentBg:"rgba(22,163,74,0.10)",navHov:"#f1f5f9" };
@@ -131,7 +133,7 @@ export function AdminLayout() {
           <nav className="adl-nav">{NAV.map(({ to, label, Icon }) => (<NavLink key={to} to={to} className={({ isActive }) => "adl-nav-item" + (isActive ? " adl-nav-item--on" : "")}><Icon size={17} strokeWidth={2} /><span className="adl-nav-lbl">{label}</span>{to==="/admin/messages"&&unreadCount>0&&<span style={{marginLeft:"auto",background:"#f85149",color:"#fff",fontSize:"0.65rem",fontWeight:700,padding:"1px 6px",borderRadius:20,minWidth:18,textAlign:"center"}}>{unreadCount}</span>}</NavLink>))}</nav>
           <div className="adl-footer"><div style={{position:"relative"}}><button onClick={()=>setPopOpen(p=>!p)} style={{display:"flex",alignItems:"center",gap:"9px",background:"none",border:"none",cursor:"pointer",padding:"4px",borderRadius:"8px",width:"100%",transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"}><div className="adl-av">{user?.firstName?.[0]?.toUpperCase()??"A"}</div><div style={{textAlign:"left"}}><div style={{fontSize:".8rem",fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"120px"}}>{user?.firstName} {user?.lastName}</div><div style={{fontSize:".7rem",color:"var(--muted,#8b949e)"}}>Admin</div></div><span style={{marginLeft:"auto",fontSize:"18px",color:"var(--muted)",letterSpacing:"2px",lineHeight:1,flexShrink:0,opacity:0.6}}>&#8943;</span></button>{popOpen&&(<div style={{position:"absolute",bottom:"48px",left:0,right:0,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",padding:"6px",zIndex:50,boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}><button onClick={()=>{setPopOpen(false);navigate("/admin/profile");}} onMouseEnter={e=>e.currentTarget.style.background="var(--hov)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"var(--text)",cursor:"pointer",textAlign:"left",fontFamily:"inherit"}}>Profile</button><button onClick={()=>{signOut();navigate("/");}} onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="none"} style={{display:"block",width:"100%",padding:"8px 12px",background:"none",border:"none",borderRadius:"7px",fontSize:".82rem",fontWeight:600,color:"#ef4444",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"background .12s"}}>Sign out</button></div>)}</div></div>
         </aside>
-        <main className="adl-main"><div className="adl-topbar"><button className="adl-hamburger" onClick={() => setMenuOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div style={{display:"flex",alignItems:"center",gap:10,flex:1,justifyContent:"flex-end"}}><span style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)",letterSpacing:"-0.01em",maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{orgName}</span><button className="adl-toggle" onClick={toggle} title={dark?"Light mode":"Dark mode"}>{dark ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}</button></div></div><Outlet context={{ dark }} /></main>
+        <main className="adl-main"><div className="adl-topbar"><button className="adl-hamburger" onClick={() => setMenuOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div style={{display:"flex",alignItems:"center",gap:10,flex:1,justifyContent:"flex-end"}}><OrgBrand logoUrl={myOrg?.logoUrl} name={orgName} /></div></div><Outlet context={{ dark }} /></main>
       </div>
     </ThemeContext.Provider>
   );

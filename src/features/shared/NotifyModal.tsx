@@ -79,10 +79,13 @@ interface NotifyModalProps {
 export function NotifyModal({ isOpen, onClose, template, data, target, title, onInApp }: NotifyModalProps) {
   const [msg, setMsg] = useState(() => buildMessage(template, data));
   const [sent, setSent] = useState<"whatsapp" | "email" | "inapp" | null>(null);
+  const [manualPhone, setManualPhone] = useState("");
 
   if (!isOpen) return null;
 
-  const phone = target === "visitor" ? data.visitorPhone : data.hostPhone;
+  const savedPhone = target === "visitor" ? data.visitorPhone : data.hostPhone;
+  // No saved number: let the receptionist type one so WhatsApp is never a dead end.
+  const phone = savedPhone || manualPhone;
   const email = target === "visitor" ? data.visitorEmail : undefined;
 
   const sendWhatsApp = () => {
@@ -188,6 +191,25 @@ export function NotifyModal({ isOpen, onClose, template, data, target, title, on
               </div>
             </div>
           </div>
+          {!savedPhone && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 11, color: "var(--muted, #8b949e)", marginBottom: 6 }}>
+                No WhatsApp number saved for {target === "visitor" ? data.visitorName : data.hostName}. Type one to send now:
+              </div>
+              <input
+                value={manualPhone}
+                onChange={e => setManualPhone(e.target.value)}
+                placeholder="e.g. 024 123 4567"
+                inputMode="tel"
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  background: "var(--bg, #0d1117)", border: "1px solid var(--border, #30363d)",
+                  borderRadius: 8, padding: "9px 12px", color: "var(--text, #e6edf3)",
+                  fontSize: 13, fontFamily: "inherit", outline: "none",
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* message editor */}

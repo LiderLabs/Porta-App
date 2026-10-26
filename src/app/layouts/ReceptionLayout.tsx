@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useState, useEffect } from "react";
 import { useHideOverlay } from "../../App";
+import { OrgBrand } from "../../features/shared/OrgBrand";
 
 const NAV = [
   { to: "/reception/front-desk", label: "Front desk", short: "Front desk" },
@@ -30,7 +31,7 @@ export function AppLayout() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [theme, setTheme] = useState<"dark" | "light">(() => (localStorage.getItem("porta-theme") as "dark" | "light") ?? "dark");
+  const theme = "dark" as const;
   useEffect(() => { document.documentElement.setAttribute("data-theme", theme); localStorage.setItem("porta-theme", theme); }, [theme]);
   const { hide } = useHideOverlay();
   useEffect(() => { const t = setTimeout(hide, 50); return () => clearTimeout(t); }, []);
@@ -40,7 +41,6 @@ export function AppLayout() {
     if (search.trim()) navigate("/reception/visitors?search=" + encodeURIComponent(search.trim()));
   };
   const badgeFor = (b?: "pending" | "unread") => (b === "pending" ? pendingCount : b === "unread" ? unreadCount : 0);
-  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
   const logout = async () => { await signOut(); navigate("/login"); };
 
   return (
@@ -140,8 +140,7 @@ export function AppLayout() {
             <input className="rl-search" type="search" placeholder="Search visitors" aria-label="Search visitors" value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: "100%" }} />
           </form>
           <div className="rl-top-right">
-            <span className="rl-org">{orgName}</span>
-            <button className="rl-ghost" onClick={toggleTheme}>{theme === "dark" ? "Light mode" : "Dark mode"}</button>
+            <OrgBrand className="rl-org" logoUrl={myOrg?.logoUrl} name={orgName} />
           </div>
         </header>
 
@@ -175,7 +174,6 @@ export function AppLayout() {
           <div className="rl-sheet" role="dialog" aria-label="Account">
             <div style={{ fontSize: ".85rem", fontWeight: 700, padding: "2px 4px 6px" }}>{displayName} <span style={{ color: "var(--muted)", fontWeight: 500 }}>· {orgName}</span></div>
             <button className="rl-ghost" onClick={() => { setSheetOpen(false); navigate("/reception/profile"); }}>Profile</button>
-            <button className="rl-ghost" onClick={toggleTheme}>{theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}</button>
             <button className="rl-ghost rl-out" onClick={logout}>Sign out</button>
           </div>
         </div>
